@@ -1,0 +1,437 @@
+:root {
+  --surface: #0f4138;
+  --surface-dark: #0a2823;
+  --surface-light: #125348;
+  --card: #1f6459;
+  --accent: #6df0c0;
+  --text-main: #f0fff7;
+  --text-muted: rgba(240, 255, 247, 0.6);
+  --shadow: 0 25px 60px rgba(3, 17, 14, 0.4);
+  --radius-lg: 28px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #145d51, var(--surface) 42%, #052520 100%);
+  color: var(--text-main);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 4vw, 40px) 72px;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 32px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  /* Sustituye este degradado por un color plano o elimina el fondo si insertas un <img> en el HTML */
+  background: linear-gradient(145deg, #6df0c0, #3bc4a4 58%, #0f4138);
+  box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.12), var(--shadow);
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.brand__text--bold {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.site-nav {
+  display: flex;
+  gap: clamp(16px, 4vw, 36px);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.site-nav a {
+  position: relative;
+  padding-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.site-nav a:hover,
+.site-nav a:focus {
+  color: var(--accent);
+}
+
+.site-nav a:hover::after,
+.site-nav a:focus::after {
+  transform: scaleX(1);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(32px, 6vw, 56px);
+  align-items: center;
+  padding: clamp(32px, 5vw, 72px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(6, 54, 46, 0.9), rgba(17, 82, 72, 0.9));
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(109, 240, 192, 0.25), transparent 55%);
+  pointer-events: none;
+}
+
+.hero__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  z-index: 1;
+}
+
+.hero__content h1 {
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
+  line-height: 1.05;
+}
+
+.hero__button {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6df0c0, #33c6a1);
+  color: #093229;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 18px 30px rgba(12, 63, 52, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero__button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 44px rgba(12, 63, 52, 0.55);
+}
+
+.hero__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: calc(var(--radius-lg) - 6px);
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 26px 48px rgba(5, 37, 32, 0.6);
+}
+
+.hero__media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Cambia la imagen principal del home reemplazando esta URL */
+  background: url("https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=900&q=80") center/cover;
+  filter: saturate(115%);
+  transition: transform 0.6s ease;
+}
+
+.hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, transparent 20%, rgba(13, 61, 52, 0.8) 100%);
+}
+
+.hero__media:hover::before {
+  transform: scale(1.05);
+}
+
+/* Valores */
+
+.values {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 6vw, 60px);
+}
+
+.values__hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  min-height: 260px;
+  background: linear-gradient(135deg, rgba(19, 95, 81, 0.92), rgba(8, 55, 48, 0.92));
+  box-shadow: var(--shadow);
+}
+
+.values__hero-layer {
+  position: absolute;
+  inset: 0;
+  /* Reemplaza la fotografía de fondo de la sección Valores editando esta URL */
+  background: url("https://images.unsplash.com/photo-1558611848-73f7eb4001a1?auto=format&fit=crop&w=1600&q=80") center/cover;
+  opacity: 0.35;
+}
+
+.values__hero-content {
+  position: relative;
+  padding: clamp(32px, 6vw, 64px);
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.values__tag {
+  align-self: flex-start;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.2);
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.24em;
+}
+
+.values__hero h2 {
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  letter-spacing: 0.12em;
+}
+
+.values__hero p {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.values__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.values__controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.values__sort {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(109, 240, 192, 0.4);
+  background: rgba(18, 83, 72, 0.4);
+  color: var(--text-main);
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.values__sort:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 28px rgba(6, 42, 36, 0.35);
+}
+
+.values__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(24px, 4vw, 36px);
+}
+
+.value-card {
+  position: relative;
+  border-radius: calc(var(--radius-lg) - 6px);
+  overflow: hidden;
+  background: rgba(18, 83, 72, 0.6);
+  padding: 24px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 34px rgba(5, 32, 27, 0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-6px);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.4), 0 28px 48px rgba(5, 32, 27, 0.55);
+}
+
+.value-card__media {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  height: 160px;
+  box-shadow: 0 12px 28px rgba(3, 22, 19, 0.5);
+}
+
+.value-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.02);
+  transition: transform 0.4s ease;
+}
+
+.value-card:hover .value-card__media::after {
+  transform: scale(1.08);
+}
+
+.value-card__media--evaluacion::after {
+  /* Ajusta la imagen de la tarjeta "Evaluación Kinesiológica" modificando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=900&q=80");
+}
+
+.value-card__media--kine-1::after {
+  /* Actualiza la imagen de la sesión individual reemplazando la URL */
+  background-image: url("https://images.unsplash.com/photo-1603394726650-433a95f6e417?auto=format&fit=crop&w=900&q=80");
+}
+
+.value-card__media--kine-5::after {
+  /* Cambia la imagen del plan de 5 sesiones modificando la URL */
+  background-image: url("https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80");
+}
+
+.value-card__media--kine-15::after {
+  /* Cambia la imagen del plan de 15 sesiones modificando la URL */
+  background-image: url("https://images.unsplash.com/photo-1579154203451-0ef3fc0d7f8a?auto=format&fit=crop&w=900&q=80");
+}
+
+.value-card__media--fisica::after {
+  /* Reemplaza la imagen de kinesiología física editando la URL */
+  background-image: url("https://images.unsplash.com/photo-1582719478250-0f5ee8a0a52a?auto=format&fit=crop&w=900&q=80");
+}
+
+.value-card__media--ocupacional::after {
+  /* Reemplaza la imagen de terapia ocupacional editando la URL */
+  background-image: url("https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80");
+}
+
+.value-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text-main);
+}
+
+.value-card__header h3 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.value-card__header span {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--text-muted);
+}
+
+.value-card__price {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.value-card__action {
+  align-self: flex-start;
+  padding: 10px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6df0c0, #33c6a1);
+  color: #093229;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.value-card__action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px rgba(6, 42, 36, 0.4);
+}
+
+@media (max-width: 860px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .site-nav {
+    flex-wrap: wrap;
+  }
+
+  .hero {
+    padding: 40px 28px;
+  }
+}
+
+@media (max-width: 540px) {
+  .hero {
+    text-align: center;
+  }
+
+  .hero__button {
+    align-self: center;
+  }
+
+  .site-header {
+    align-items: center;
+  }
+
+  .values__toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
