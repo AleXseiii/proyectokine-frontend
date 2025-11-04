@@ -1,3 +1,5 @@
+/* ---------- Estilos base compartidos por todas las pestañas ---------- */
+
 :root {
   --surface: #0f4138;
   --surface-dark: #0a2823;
@@ -15,6 +17,8 @@
   margin: 0;
   padding: 0;
 }
+
+/* ---------- Layout y cabecera compartida ---------- */
 
 body {
   min-height: 100vh;
@@ -107,6 +111,8 @@ a {
   transform: scaleX(1);
 }
 
+/* ---------- Pestaña Inicio ---------- */
+
 .hero {
   position: relative;
   display: grid;
@@ -192,7 +198,7 @@ a {
   transform: scale(1.05);
 }
 
-/* Valores */
+/* ---------- Pestaña Valores ---------- */
 
 .values {
   display: flex;
@@ -233,7 +239,7 @@ a {
 }
 
 .values__tag {
-  align-self: flex-start;
+  align-self: center;
   padding: 8px 18px;
   border-radius: 999px;
   background: rgba(109, 240, 192, 0.2);
@@ -402,6 +408,416 @@ a {
   box-shadow: 0 18px 30px rgba(6, 42, 36, 0.4);
 }
 
+/* ---------- Pestaña ¿Quiénes somos? ---------- */
+
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 6vw, 60px);
+}
+
+.about__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(32px, 6vw, 60px);
+  align-items: center;
+  padding: clamp(32px, 6vw, 64px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(19, 95, 81, 0.92), rgba(8, 55, 48, 0.92));
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.about__card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(109, 240, 192, 0.2), transparent 60%);
+  pointer-events: none;
+}
+
+.about__media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: calc(var(--radius-lg) - 8px);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 26px 48px rgba(5, 37, 32, 0.6);
+}
+
+.about__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Reemplaza la imagen del equipo modificando esta URL */
+  background: url("https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=900&q=80") center/cover;
+  transition: transform 0.6s ease;
+}
+
+.about__media:hover::after {
+  transform: scale(1.05);
+}
+
+.about__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: var(--text-main);
+}
+
+.about__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about__tag {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.18);
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.about__header h1 {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  letter-spacing: 0.08em;
+}
+
+.about__content p {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.about__button {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6df0c0, #33c6a1);
+  color: #093229;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 18px 30px rgba(12, 63, 52, 0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about__button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 44px rgba(12, 63, 52, 0.55);
+}
+
+/* Bloque de misión, visión y enfoque terapéutico */
+
+.about__highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(18px, 4vw, 28px);
+}
+
+.about-highlight {
+  position: relative;
+  padding: clamp(24px, 5vw, 32px);
+  border-radius: calc(var(--radius-lg) - 10px);
+  background: linear-gradient(145deg, rgba(19, 95, 81, 0.75), rgba(6, 44, 38, 0.85));
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.12), 0 22px 40px rgba(5, 32, 27, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.about-highlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(109, 240, 192, 0.18), transparent 62%);
+  pointer-events: none;
+}
+
+.about-highlight__title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.about-highlight__text {
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.about-highlight__cta {
+  align-self: flex-start;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(109, 240, 192, 0.35);
+  background: rgba(12, 63, 52, 0.35);
+  color: var(--text-main);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Recorrido del paciente */
+
+.about__journey {
+  position: relative;
+  padding: clamp(36px, 6vw, 56px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(9, 52, 45, 0.9), rgba(3, 21, 18, 0.9));
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.about__journey::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at bottom right, rgba(109, 240, 192, 0.18), transparent 60%);
+  pointer-events: none;
+}
+
+.journey__header {
+  position: relative;
+  max-width: 520px;
+  margin-bottom: clamp(24px, 5vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journey__title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: 0.08em;
+}
+
+.journey__subtitle {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.journey__list {
+  position: relative;
+  display: grid;
+  gap: 22px;
+  z-index: 1;
+}
+
+.journey__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(8, 55, 48, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.1);
+}
+
+.journey__dot {
+  width: 14px;
+  height: 14px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 6px rgba(109, 240, 192, 0.14);
+}
+
+.journey__item h3 {
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.journey__item p {
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* Equipo clínico */
+
+.about__team {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about__team-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about__team-header span {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.18);
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.about__team-header h2 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  letter-spacing: 0.08em;
+}
+
+.about__team-header p {
+  color: var(--text-muted);
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(20px, 4vw, 28px);
+}
+
+.team-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: calc(var(--radius-lg) - 10px);
+  background: rgba(8, 55, 48, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.12), 0 22px 38px rgba(3, 21, 18, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.3), 0 30px 48px rgba(3, 21, 18, 0.6);
+}
+
+.team-card__photo {
+  position: relative;
+  height: 200px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(5, 32, 27, 0.55);
+}
+
+.team-card__photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(110%);
+  transition: transform 0.4s ease;
+}
+
+.team-card:hover .team-card__photo::after {
+  transform: scale(1.06);
+}
+
+.team-card__photo--andrea::after {
+  /* Sustituye la foto de Andrea Vega actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__photo--matias::after {
+  /* Sustituye la foto de Matías León actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__photo--valentina::after {
+  /* Sustituye la foto de Valentina Rojas actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__photo--ignacio::after {
+  /* Sustituye la foto de Ignacio Fuentes actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1520367745676-234fdd6e9ff3?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__name {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.team-card__role {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.team-card__bio {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.team-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.team-card__tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.18);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Llamado final */
+
+.about__cta {
+  margin-top: clamp(32px, 6vw, 56px);
+  padding: clamp(28px, 6vw, 44px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(109, 240, 192, 0.28), rgba(51, 198, 161, 0.16));
+  color: #052520;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 26px 48px rgba(5, 37, 32, 0.45);
+}
+
+.about__cta strong {
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  letter-spacing: 0.06em;
+}
+
+.about__cta p {
+  color: #052520;
+  line-height: 1.6;
+  max-width: 620px;
+}
+
+.about__cta a {
+  align-self: flex-start;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: #052520;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about__cta a:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 36px rgba(5, 37, 32, 0.55);
+}
+
 @media (max-width: 860px) {
   .site-header {
     flex-direction: column;
@@ -433,5 +849,17 @@ a {
   .values__toolbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .about__card {
+    padding: 40px 28px;
+  }
+
+  .journey__item {
+    grid-template-columns: 1fr;
+  }
+
+  .journey__dot {
+    display: none;
   }
 }
