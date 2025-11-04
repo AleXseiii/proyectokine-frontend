@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+     <link rel="stylesheet" href="./home.css">
 </head>
 <body>
     <div class="layout">
@@ -22,8 +22,8 @@
                 </div>
             </div>
             <nav class="site-nav">
-                <a href="{% url 'home' %}#inicio">Inicio</a>
-                <a href="{% url 'valores' %}">Valores</a>
+                                <a href="./home.html#inicio">Inicio</a>
+                <a href="./valores.html">Valores</a>
                 <a href="#">¿Quiénes somos?</a>
                 <a href="#">Seguimiento</a>
             </nav>
@@ -31,7 +31,9 @@
 
         <main class="values">
             <div class="values__hero">
-                <div class="values__hero-layer"></div>
+                 <div class="values__hero-layer">
+                    <!-- Cambia la imagen del banner desde home.css (.values__hero-layer) -->
+                </div>
                 <div class="values__hero-content">
                     <span class="values__tag">Servicios</span>
                     <h2>VALORES</h2>
@@ -49,7 +51,9 @@
 
             <div class="values__grid">
                 <article class="value-card">
-                    <div class="value-card__media value-card__media--evaluacion" aria-hidden="true"></div>
+                     <div class="value-card__media value-card__media--evaluacion" aria-hidden="true">
+                        <!-- Ajusta la foto editando la URL en home.css (.value-card__media--evaluacion) -->
+                    </div>
                     <div class="value-card__body">
                         <header class="value-card__header">
                             <h3>Evaluación Kinesiológica</h3>
@@ -61,7 +65,9 @@
                 </article>
 
                 <article class="value-card">
-                    <div class="value-card__media value-card__media--kine-1" aria-hidden="true"></div>
+                        <div class="value-card__media value-card__media--kine-1" aria-hidden="true">
+                        <!-- Actualiza la foto modificando la URL en home.css (.value-card__media--kine-1) -->
+                    </div>
                     <div class="value-card__body">
                         <header class="value-card__header">
                             <h3>1 sesión de kinesiología</h3>
@@ -85,7 +91,9 @@
                 </article>
 
                 <article class="value-card">
-                    <div class="value-card__media value-card__media--kine-15" aria-hidden="true"></div>
+                    <div class="value-card__media value-card__media--kine-5" aria-hidden="true">
+                        <!-- Actualiza la foto modificando la URL en home.css (.value-card__media--kine-5) -->
+                    </div>
                     <div class="value-card__body">
                         <header class="value-card__header">
                             <h3>Plan 15 sesiones kinesiología</h3>
@@ -97,7 +105,9 @@
                 </article>
 
                 <article class="value-card">
-                    <div class="value-card__media value-card__media--fisica" aria-hidden="true"></div>
+                    <div class="value-card__media value-card__media--fisica" aria-hidden="true">
+                        <!-- Actualiza la foto modificando la URL en home.css (.value-card__media--fisica) -->
+                    </div>
                     <div class="value-card__body">
                         <header class="value-card__header">
                             <h3>Sesión kinesiología física</h3>
@@ -109,7 +119,9 @@
                 </article>
 
                 <article class="value-card">
-                    <div class="value-card__media value-card__media--ocupacional" aria-hidden="true"></div>
+                    <div class="value-card__media value-card__media--ocupacional" aria-hidden="true">
+                        <!-- Actualiza la foto modificando la URL en home.css (.value-card__media--ocupacional) -->
+                    </div>
                     <div class="value-card__body">
                         <header class="value-card__header">
                             <h3>Sesión terapia ocupacional</h3>
