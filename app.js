@@ -7,6 +7,7 @@ const professionals = {
     bio:
       "Me dedico a la rehabilitación y prevención de lesiones musculoesqueléticas, promoviendo el ejercicio terapéutico personalizado con seguimiento digital y acompañamiento constante.",
     photoClass: "booking__profile-photo--lissette",
+    avatarClass: "booking-card__avatar--lissette",
     sessions: [
       { title: "1 sesión de kinesiología", subtitle: "45 minutos", price: "$25.000" },
       { title: "Recovery", subtitle: "Sesión 55 minutos", price: "$35.000" },
@@ -21,6 +22,7 @@ const professionals = {
     bio:
       "Especialista en retorno deportivo post lesión. Planifico protocolos de fuerza, control motor y movilidad para deportistas que buscan volver a competir con seguridad.",
     photoClass: "booking__profile-photo--javier",
+    avatarClass: "booking-card__avatar--javier",
     sessions: [
       { title: "Sesión performance", subtitle: "60 minutos", price: "$32.000" },
       { title: "Plan retorno competitivo", subtitle: "3 sesiones + evaluación", price: "$92.000" },
@@ -35,6 +37,7 @@ const professionals = {
     bio:
       "Trabajo junto a pacientes con patologías respiratorias para mejorar su capacidad pulmonar mediante técnicas de respiración, ejercicio aeróbico y seguimiento remoto.",
     photoClass: "booking__profile-photo--martin",
+    avatarClass: "booking-card__avatar--martin",
     sessions: [
       { title: "Sesión respiratoria", subtitle: "45 minutos", price: "$24.000" },
       { title: "Programa pulmonar", subtitle: "4 sesiones + control", price: "$89.000" },
@@ -49,6 +52,7 @@ const professionals = {
     bio:
       "Diseño sesiones dinámicas enfocadas en fuerza funcional, estabilidad y control motor para que mejores tu rendimiento y evites recaídas en tus actividades favoritas.",
     photoClass: "booking__profile-photo--ignacio",
+    avatarClass: "booking-card__avatar--ignacio",
     sessions: [
       { title: "Sesión funcional", subtitle: "50 minutos", price: "$28.000" },
       { title: "Plan mensual", subtitle: "8 sesiones guiadas", price: "$150.000" },
@@ -63,6 +67,7 @@ const professionals = {
     bio:
       "Acompaño procesos de embarazo y postparto con foco en el fortalecimiento del suelo pélvico, control de la respiración y activación del core para recuperar confianza corporal.",
     photoClass: "booking__profile-photo--isidora",
+    avatarClass: "booking-card__avatar--isidora",
     sessions: [
       { title: "Evaluación obstétrica", subtitle: "Primera visita", price: "$27.000" },
       { title: "Sesión suelo pélvico", subtitle: "50 minutos", price: "$30.000" },
@@ -73,6 +78,42 @@ const professionals = {
 };
 
 const professionalKeys = Object.keys(professionals);
+
+function createProfessionalButton(key, data, isActive = false) {
+  const listItem = document.createElement("li");
+
+  const button = document.createElement("button");
+  button.className = "booking-card";
+  if (isActive) {
+    button.classList.add("is-active");
+  }
+  button.type = "button";
+  button.dataset.professional = key;
+  button.setAttribute("role", "tab");
+  button.setAttribute("aria-selected", isActive ? "true" : "false");
+
+  const avatar = document.createElement("span");
+  avatar.className = "booking-card__avatar";
+  if (data.avatarClass) {
+    avatar.classList.add(data.avatarClass);
+  }
+  avatar.setAttribute("aria-hidden", "true");
+
+  const info = document.createElement("span");
+  info.className = "booking-card__info";
+
+  const name = document.createElement("strong");
+  name.textContent = data.name;
+
+  const specialty = document.createElement("span");
+  specialty.textContent = data.role;
+
+  info.append(name, specialty);
+  button.append(avatar, info);
+  listItem.appendChild(button);
+
+  return { listItem, button };
+}
 
 function createSessionCard(session) {
   const article = document.createElement("article");
@@ -149,11 +190,33 @@ function initBookingPage() {
   const bookingRoot = document.querySelector(".booking");
   if (!bookingRoot) return;
 
-  const buttons = Array.from(document.querySelectorAll("[data-professional]"));
-  const toast = document.createElement("div");
+  const list = bookingRoot.querySelector("[data-professional-list]");
+  let buttons = [];
+
+  if (list) {
+    list.innerHTML = "";
+    const fragment = document.createDocumentFragment();
+
+    professionalKeys.forEach((key, index) => {
+      const { listItem, button } = createProfessionalButton(key, professionals[key], index === 0);
+      fragment.appendChild(listItem);
+      buttons.push(button);
+    });
+
+    list.appendChild(fragment);
+  } else {
+    buttons = Array.from(document.querySelectorAll("[data-professional]"));
+  }
+
+  if (!buttons.length) return;
+
+  const existingToast = bookingRoot.querySelector(".booking__toast");
+  const toast = existingToast || document.createElement("div");
   toast.className = "booking__toast";
   toast.setAttribute("role", "status");
-  bookingRoot.appendChild(toast);
+  if (!existingToast) {
+    bookingRoot.appendChild(toast);
+  }
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {

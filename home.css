@@ -836,7 +836,9 @@ a {
   box-shadow: var(--shadow);
   overflow: hidden;
 
-  .about__card::before {
+}
+
+.about__card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1710,4 +1712,3 @@ a {
   .journey__dot {
     display: none;
   }
-}
