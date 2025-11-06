@@ -818,6 +818,413 @@ a {
   box-shadow: 0 22px 36px rgba(5, 37, 32, 0.55);
 }
 
+.about {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 6vw, 60px);
+}
+
+.about__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(32px, 6vw, 60px);
+  align-items: center;
+  padding: clamp(32px, 6vw, 64px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(19, 95, 81, 0.92), rgba(8, 55, 48, 0.92));
+  box-shadow: var(--shadow);
+  overflow: hidden;
+
+  .about__card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(109, 240, 192, 0.2), transparent 60%);
+  pointer-events: none;
+}
+
+.about__media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: calc(var(--radius-lg) - 8px);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 26px 48px rgba(5, 37, 32, 0.6);
+}
+
+.about__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Reemplaza la imagen del equipo modificando esta URL */
+  background: url("https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=900&q=80") center/cover;
+  transition: transform 0.6s ease;
+}
+
+.about__media:hover::after {
+  transform: scale(1.05);
+}
+
+.about__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: var(--text-main);
+}
+
+.about__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about__tag {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.18);
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.about__header h1 {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  letter-spacing: 0.08em;
+}
+
+.about__content p {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.about__button {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6df0c0, #33c6a1);
+  color: #093229;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 18px 30px rgba(12, 63, 52, 0.45);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about__button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 26px 44px rgba(12, 63, 52, 0.55);
+}
+
+/* Bloque de misión, visión y enfoque terapéutico */
+
+.about__highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(18px, 4vw, 28px);
+}
+
+.about-highlight {
+  position: relative;
+  padding: clamp(24px, 5vw, 32px);
+  border-radius: calc(var(--radius-lg) - 10px);
+  background: linear-gradient(145deg, rgba(19, 95, 81, 0.75), rgba(6, 44, 38, 0.85));
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.12), 0 22px 40px rgba(5, 32, 27, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.about-highlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(109, 240, 192, 0.18), transparent 62%);
+  pointer-events: none;
+}
+
+.about-highlight__title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.about-highlight__text {
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.about-highlight__cta {
+  align-self: flex-start;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(109, 240, 192, 0.35);
+  background: rgba(12, 63, 52, 0.35);
+  color: var(--text-main);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Recorrido del paciente */
+
+.about__journey {
+  position: relative;
+  padding: clamp(36px, 6vw, 56px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(9, 52, 45, 0.9), rgba(3, 21, 18, 0.9));
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.about__journey::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at bottom right, rgba(109, 240, 192, 0.18), transparent 60%);
+  pointer-events: none;
+}
+
+.journey__header {
+  position: relative;
+  max-width: 520px;
+  margin-bottom: clamp(24px, 5vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journey__title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: 0.08em;
+}
+
+.journey__subtitle {
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.journey__list {
+  position: relative;
+  display: grid;
+  gap: 22px;
+  z-index: 1;
+}
+
+.journey__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(8, 55, 48, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.1);
+}
+
+.journey__dot {
+  width: 14px;
+  height: 14px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 6px rgba(109, 240, 192, 0.14);
+}
+
+.journey__item h3 {
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.journey__item p {
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* Equipo clínico */
+
+.about__team {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.about__team-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.about__team-header span {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.18);
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.about__team-header h2 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  letter-spacing: 0.08em;
+}
+
+.about__team-header p {
+  color: var(--text-muted);
+  max-width: 640px;
+  line-height: 1.7;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(20px, 4vw, 28px);
+}
+
+.team-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: calc(var(--radius-lg) - 10px);
+  background: rgba(8, 55, 48, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.12), 0 22px 38px rgba(3, 21, 18, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.team-card:hover {
+  transform: translateY(-6px);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.3), 0 30px 48px rgba(3, 21, 18, 0.6);
+}
+
+.team-card__photo {
+  position: relative;
+  height: 200px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(5, 32, 27, 0.55);
+}
+
+.team-card__photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(110%);
+  transition: transform 0.4s ease;
+}
+
+.team-card:hover .team-card__photo::after {
+  transform: scale(1.06);
+}
+
+.team-card__photo--andrea::after {
+  /* Sustituye la foto de Andrea Vega actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__photo--matias::after {
+  /* Sustituye la foto de Matías León actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__photo--valentina::after {
+  /* Sustituye la foto de Valentina Rojas actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__photo--ignacio::after {
+  /* Sustituye la foto de Ignacio Fuentes actualizando esta URL */
+  background-image: url("https://images.unsplash.com/photo-1520367745676-234fdd6e9ff3?auto=format&fit=crop&w=800&q=80");
+}
+
+.team-card__name {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.team-card__role {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.team-card__bio {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.team-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.team-card__tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.18);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Llamado final */
+
+.about__cta {
+  margin-top: clamp(32px, 6vw, 56px);
+  padding: clamp(28px, 6vw, 44px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(109, 240, 192, 0.28), rgba(51, 198, 161, 0.16));
+  color: #052520;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 26px 48px rgba(5, 37, 32, 0.45);
+}
+
+.about__cta strong {
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  letter-spacing: 0.06em;
+}
+
+.about__cta p {
+  color: #052520;
+  line-height: 1.6;
+  max-width: 620px;
+}
+
+.about__cta a {
+  align-self: flex-start;
+  padding: 12px 28px;
+  border-radius: 999px;
+  background: #052520;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about__cta a:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 36px rgba(5, 37, 32, 0.55);
+}
+
 @media (max-width: 860px) {
   .site-header {
     flex-direction: column;
@@ -850,6 +1257,447 @@ a {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .about__card {
+    padding: 40px 28px;
+  }
+
+  .journey__item {
+    grid-template-columns: 1fr;
+  }
+
+  .journey__dot {
+    display: none;
+  }
+}
+
+/* ---------- Pestaña Agendar hora ---------- */
+
+.booking {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 5vw, 56px);
+}
+
+.booking__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 720px;
+}
+
+.booking__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(109, 240, 192, 0.12);
+  color: var(--accent);
+}
+
+.booking__shell {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 40px);
+  align-items: stretch;
+}
+
+.booking__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: clamp(20px, 4vw, 32px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(5, 36, 31, 0.85), rgba(18, 84, 72, 0.9));
+  box-shadow: var(--shadow);
+}
+
+.booking__sidebar-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.booking__category {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.booking__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 65, 56, 0.42);
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.booking-card:hover,
+.booking-card:focus-visible {
+  transform: translateX(6px);
+  background: rgba(15, 65, 56, 0.64);
+  border-color: rgba(109, 240, 192, 0.35);
+}
+
+.booking-card.is-active {
+  border-color: rgba(109, 240, 192, 0.9);
+  background: rgba(109, 240, 192, 0.12);
+  box-shadow: 0 12px 24px rgba(9, 50, 41, 0.35);
+}
+
+.booking-card__avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.booking-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.booking-card__info strong {
+  font-size: 15px;
+  color: var(--text-main);
+}
+
+/* Sustituye estas imágenes de perfil por fotos reales modificando las URLs de fondo */
+.booking-card__avatar--lissette {
+  background-image: url("https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=220&q=80");
+}
+
+.booking-card__avatar--javier {
+  background-image: url("https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=220&q=80");
+}
+
+.booking-card__avatar--martin {
+  background-image: url("https://images.unsplash.com/photo-1531895861208-8504d19f67c1?auto=format&fit=crop&w=220&q=80");
+}
+
+.booking-card__avatar--ignacio {
+  background-image: url("https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=220&q=80");
+}
+
+.booking-card__avatar--isidora {
+  background-image: url("https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=220&q=80");
+}
+
+.booking__profile {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4vw, 40px);
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, rgba(8, 42, 37, 0.92), rgba(16, 76, 66, 0.88));
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.booking__profile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(109, 240, 192, 0.18), transparent 65%);
+  pointer-events: none;
+}
+
+.booking__profile-header {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+  gap: clamp(24px, 5vw, 40px);
+  position: relative;
+  z-index: 1;
+}
+
+.booking__profile-photo {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 30px rgba(6, 36, 30, 0.55);
+  isolation: isolate;
+  min-height: 220px;
+}
+
+.booking__profile-photo::before,
+.booking__profile-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.booking__profile-photo::before {
+  background: rgba(5, 28, 24, 0.35);
+  mix-blend-mode: multiply;
+}
+
+/* Ajusta las imágenes principales por profesional modificando estas clases */
+.booking__profile-photo--lissette::after {
+  background: url("https://images.unsplash.com/photo-1603394668370-0d9dc11dc8df?auto=format&fit=crop&w=800&q=80") center/cover;
+}
+
+.booking__profile-photo--javier::after {
+  background: url("https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=800&q=80") center/cover;
+}
+
+.booking__profile-photo--martin::after {
+  background: url("https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=800&q=80") center/cover;
+}
+
+.booking__profile-photo--ignacio::after {
+  background: url("https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=800&q=80") center/cover;
+}
+
+.booking__profile-photo--isidora::after {
+  background: url("https://images.unsplash.com/photo-1602180129037-3e3bd9632c89?auto=format&fit=crop&w=800&q=80") center/cover;
+}
+
+.booking__profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.booking__profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.booking__profile-specialty {
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.booking__profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.booking__profile-tags span {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.booking__profile h2 {
+  font-size: clamp(1.8rem, 4vw, 2.3rem);
+}
+
+.booking__profile p {
+  color: rgba(240, 255, 247, 0.78);
+  line-height: 1.65;
+}
+
+.booking__profile-body {
+  display: grid;
+  gap: clamp(24px, 4vw, 36px);
+  position: relative;
+  z-index: 1;
+}
+
+.booking__sessions h3,
+.booking__help h3 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+.booking__session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(16px, 3vw, 24px);
+}
+
+.session-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(7, 40, 35, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.session-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.session-card__info h4 {
+  font-size: 1rem;
+}
+
+.session-card__info span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.session-card__price {
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+.session-card__action {
+  justify-self: flex-start;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #6df0c0, #33c6a1);
+  color: #093229;
+  cursor: pointer;
+  box-shadow: 0 14px 22px rgba(9, 51, 43, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.session-card__action:hover,
+.session-card__action:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px rgba(9, 51, 43, 0.55);
+}
+
+.session-card:hover,
+.session-card:focus-within {
+  transform: translateY(-6px);
+  border-color: rgba(109, 240, 192, 0.4);
+  background: rgba(9, 49, 42, 0.85);
+}
+
+.booking__help {
+  padding: 24px;
+  border-radius: 20px;
+  background: rgba(5, 30, 26, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.booking__help p {
+  margin-bottom: 16px;
+  color: rgba(240, 255, 247, 0.76);
+}
+
+.booking__help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.booking__help-link::after {
+  content: "→";
+  font-size: 18px;
+  transition: transform 0.2s ease;
+}
+
+.booking__help-link:hover::after {
+  transform: translateX(4px);
+}
+
+.booking__toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translate(-50%, 120%);
+  padding: 14px 22px;
+  border-radius: 999px;
+  background: rgba(5, 36, 31, 0.9);
+  color: var(--accent);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 18px 30px rgba(3, 17, 14, 0.42);
+  transition: transform 0.4s ease;
+  pointer-events: none;
+}
+
+.booking__toast.is-visible {
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 1024px) {
+  .booking__shell {
+    grid-template-columns: 1fr;
+  }
+
+  .booking__sidebar {
+    flex-direction: row;
+    align-items: flex-start;
+    overflow-x: auto;
+  }
+
+  .booking__sidebar-head {
+    min-width: 220px;
+  }
+
+  .booking__list {
+    flex-direction: row;
+  }
+
+  .booking-card {
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 720px) {
+  .booking__profile-header {
+    grid-template-columns: 1fr;
+  }
+
+  .booking__profile-photo {
+    min-height: 200px;
+  }
+
+  .booking__session-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .booking__sidebar {
+    flex-direction: column;
+  }
+
+  .booking__list {
+    flex-direction: column;
+  }
+}
 
   .about__card {
     padding: 40px 28px;

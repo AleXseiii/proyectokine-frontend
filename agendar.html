@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de salud y Bienestar - Agendar hora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./home.css" />
+</head>
+<body>
+  <div class="layout">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand__logo">
+          <!-- Inserta aquí el logo definitivo: <img src="/ruta/logo.svg" alt="Centro de salud y Bienestar" /> -->
+        </div>
+        <div class="brand__text">
+          <span>Centro de salud y</span>
+          <span class="brand__text--bold">Bienestar</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a href="./home.html#inicio">Inicio</a>
+        <a href="./valores.html">Valores</a>
+        <a href="./quienes.html">¿Quiénes somos?</a>
+        <a href="./agendar.html">Agendar hora</a>
+        <a href="#">Seguimiento</a>
+      </nav>
+    </header>
+
+    <main class="booking">
+      <header class="booking__intro">
+        <span class="booking__tag">Agenda en minutos</span>
+        <h1>Elige a tu kinesiólogo y reserva en línea</h1>
+        <p>
+          Selecciona al especialista ideal para tu objetivo y revisa los horarios disponibles para tu próxima sesión.
+          <!-- Puedes ajustar este texto introductorio para comunicar promociones o anuncios específicos. -->
+        </p>
+      </header>
+
+      <section class="booking__shell">
+        <aside class="booking__sidebar">
+          <div class="booking__sidebar-head">
+            <span class="booking__category">Kinesiología</span>
+            <p>Explora nuestro equipo y selecciona a quien acompañará tu proceso.</p>
+          </div>
+
+          <ul class="booking__list" role="tablist">
+            <li>
+              <button class="booking-card is-active" type="button" data-professional="lissette" role="tab" aria-selected="true">
+                <span class="booking-card__avatar booking-card__avatar--lissette" aria-hidden="true"></span>
+                <span class="booking-card__info">
+                  <strong>Lissette Manríquez</strong>
+                  <span>Rehabilitación musculoesquelética</span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button class="booking-card" type="button" data-professional="javier" role="tab" aria-selected="false">
+                <span class="booking-card__avatar booking-card__avatar--javier" aria-hidden="true"></span>
+                <span class="booking-card__info">
+                  <strong>Javier Nuñez</strong>
+                  <span>Kinesiología deportiva</span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button class="booking-card" type="button" data-professional="martin" role="tab" aria-selected="false">
+                <span class="booking-card__avatar booking-card__avatar--martin" aria-hidden="true"></span>
+                <span class="booking-card__info">
+                  <strong>Martín Díaz</strong>
+                  <span>Rehabilitación respiratoria</span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button class="booking-card" type="button" data-professional="ignacio" role="tab" aria-selected="false">
+                <span class="booking-card__avatar booking-card__avatar--ignacio" aria-hidden="true"></span>
+                <span class="booking-card__info">
+                  <strong>Ignacio Quintana</strong>
+                  <span>Entrenamiento funcional</span>
+                </span>
+              </button>
+            </li>
+            <li>
+              <button class="booking-card" type="button" data-professional="isidora" role="tab" aria-selected="false">
+                <span class="booking-card__avatar booking-card__avatar--isidora" aria-hidden="true"></span>
+                <span class="booking-card__info">
+                  <strong>Isidora Martínez</strong>
+                  <span>Suelo pélvico y maternidad</span>
+                </span>
+              </button>
+            </li>
+          </ul>
+          <!-- Reemplaza las fotos de los profesionales modificando las clases .booking-card__avatar--nombre en home.css -->
+        </aside>
+
+        <article class="booking__profile" aria-live="polite">
+          <div class="booking__profile-header">
+            <div class="booking__profile-photo booking__profile-photo--lissette" aria-hidden="true"></div>
+            <!-- Cambia la imagen principal del perfil editando la clase .booking__profile-photo--lissette en home.css -->
+            <div class="booking__profile-info">
+              <div class="booking__profile-meta">
+                <span class="booking__profile-specialty" data-profile-role>Rehabilitación musculoesquelética</span>
+                <div class="booking__profile-tags" data-profile-tags>
+                  <span>Deportivo</span>
+                  <span>Dolor crónico</span>
+                  <span>Telemedicina</span>
+                </div>
+              </div>
+              <h2 data-profile-name>Lissette Manríquez</h2>
+              <p data-profile-bio>
+                Me dedico a la rehabilitación y prevención de lesiones musculoesqueléticas, promoviendo el ejercicio
+                terapéutico personalizado con seguimiento digital y acompañamiento constante.
+              </p>
+            </div>
+          </div>
+
+          <div class="booking__profile-body">
+            <section class="booking__sessions" aria-label="Planes disponibles">
+              <h3>Selecciona un servicio</h3>
+              <div class="booking__session-grid" data-session-grid>
+                <article class="session-card">
+                  <div class="session-card__info">
+                    <h4>1 sesión de kinesiología</h4>
+                    <span>45 minutos</span>
+                  </div>
+                  <strong class="session-card__price">$25.000</strong>
+                  <button class="session-card__action" type="button">Ver horarios</button>
+                </article>
+                <article class="session-card">
+                  <div class="session-card__info">
+                    <h4>Recovery</h4>
+                    <span>Sesión 55 minutos</span>
+                  </div>
+                  <strong class="session-card__price">$35.000</strong>
+                  <button class="session-card__action" type="button">Ver horarios</button>
+                </article>
+                <article class="session-card">
+                  <div class="session-card__info">
+                    <h4>Plan semanal 3 sesiones</h4>
+                    <span>Duración 1 hora</span>
+                  </div>
+                  <strong class="session-card__price">$75.000</strong>
+                  <button class="session-card__action" type="button">Ver horarios</button>
+                </article>
+                <article class="session-card">
+                  <div class="session-card__info">
+                    <h4>Evaluación kinesiológica</h4>
+                    <span>Consulta inicial</span>
+                  </div>
+                  <strong class="session-card__price">$15.000</strong>
+                  <button class="session-card__action" type="button">Ver horarios</button>
+                </article>
+              </div>
+              <!-- Personaliza los planes y precios usando app.js o editando directamente este bloque -->
+            </section>
+
+            <section class="booking__help">
+              <h3>¿Necesitas orientación?</h3>
+              <p>
+                Si tienes dudas sobre qué profesional elegir, contáctanos y te guiaremos según tu diagnóstico.
+                <!-- Sustituye este texto con un mensaje comercial o número telefónico de contacto -->
+              </p>
+              <a class="booking__help-link" href="mailto:contacto@kine.cl">Escríbenos a contacto@kine.cl</a>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
