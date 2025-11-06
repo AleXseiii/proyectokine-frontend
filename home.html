@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="home.css">
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -10,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./home.css" />
 </head>
-<body>
+<body data-page="home">
+  <!-- data-page se utiliza en app.js para aplicar interacciones específicas a cada pestaña. -->
   <div class="layout">
     <header class="site-header">
       <div class="brand">
@@ -23,11 +23,11 @@
         </div>
       </div>
       <nav class="site-nav">
-        <a href="#inicio">Inicio</a>
-        <a href="./valores.html">Valores</a>
-        <a href="./quienes.html">¿Quiénes somos?</a>
-        <a href="./agendar.html">Agendar hora</a>
-        <a href="#">Seguimiento</a>
+        <a data-nav-target="home" href="#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="seguimiento" href="#">Seguimiento</a>
       </nav>
     </header>
 

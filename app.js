@@ -1,3 +1,6 @@
+// Marca el documento como compatible con interacciones JavaScript.
+document.documentElement.classList.add("has-js");
+
 // Actualiza esta configuración para ajustar la información y servicios de cada profesional.
 const professionals = {
   lissette: {
@@ -78,6 +81,116 @@ const professionals = {
 };
 
 const professionalKeys = Object.keys(professionals);
+
+function getCurrentPage() {
+  const { page } = document.body?.dataset ?? {};
+  return page ?? "";
+}
+
+function initNavigationHighlight() {
+  const currentPage = getCurrentPage();
+  const navLinks = document.querySelectorAll(".site-nav [data-nav-target]");
+
+  navLinks.forEach((link) => {
+    const { navTarget } = link.dataset;
+    if (!navTarget) return;
+
+    const isActive = navTarget === currentPage;
+    link.classList.toggle("is-active", isActive);
+    link.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+}
+
+function initSmoothScroll() {
+  const samePageLinks = document.querySelectorAll('a[href^="#"]');
+
+  samePageLinks.forEach((link) => {
+    const href = link.getAttribute("href");
+    if (!href || href.length <= 1) return;
+
+    const target = document.getElementById(href.slice(1));
+    if (!target) return;
+
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      target.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+}
+
+function initHomePage() {
+  const hero = document.querySelector(".hero");
+  if (!hero) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) {
+    hero.classList.add("is-ready");
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    hero.classList.add("is-ready");
+  });
+}
+
+function getPriceValue(card) {
+  const priceElement = card.querySelector(".value-card__price");
+  if (!priceElement) return 0;
+  const digits = priceElement.textContent.replace(/[^0-9]/g, "");
+  return Number.parseInt(digits, 10) || 0;
+}
+
+function initValuesPage() {
+  const grid = document.querySelector(".values__grid");
+  if (!grid) return;
+
+  const cards = Array.from(grid.querySelectorAll(".value-card"));
+  const range = document.querySelector(".values__range");
+  if (range) {
+    range.textContent = `Mostrando ${cards.length} servicios`;
+  }
+
+  const sortButton = document.querySelector(".values__sort");
+  if (!sortButton) return;
+
+  const defaultOrder = cards.slice();
+  let sortAscending = false;
+
+  sortButton.setAttribute("aria-pressed", "false");
+
+  sortButton.addEventListener("click", () => {
+    sortAscending = !sortAscending;
+    sortButton.setAttribute("aria-pressed", sortAscending ? "true" : "false");
+
+    const nextCards = sortAscending
+      ? [...cards].sort((a, b) => getPriceValue(a) - getPriceValue(b))
+      : defaultOrder;
+
+    grid.innerHTML = "";
+    nextCards.forEach((card) => grid.appendChild(card));
+
+    sortButton.textContent = sortAscending ? "Precio: menor a mayor" : "Orden predeterminada";
+  });
+}
+
+function initAboutPage() {
+  const teamCards = document.querySelectorAll(".team-card");
+  if (!teamCards.length) return;
+
+  const setActiveCard = (card) => {
+    teamCards.forEach((item) => {
+      item.classList.toggle("is-active", item === card);
+    });
+  };
+
+  teamCards.forEach((card) => {
+    ["mouseenter", "focusin", "click"].forEach((eventName) => {
+      card.addEventListener(eventName, () => setActiveCard(card));
+    });
+  });
+
+  setActiveCard(teamCards[0]);
+}
 
 function createProfessionalButton(key, data, isActive = false) {
   const listItem = document.createElement("li");
@@ -241,4 +354,22 @@ function initBookingPage() {
   }
 }
 
-window.addEventListener("DOMContentLoaded", initBookingPage);
+const pageInitializers = {
+  home: initHomePage,
+  valores: initValuesPage,
+  quienes: initAboutPage,
+  agendar: initBookingPage
+};
+
+window.addEventListener("DOMContentLoaded", () => {
+  initNavigationHighlight();
+  initSmoothScroll();
+
+  const currentPage = getCurrentPage();
+  const initializer = pageInitializers[currentPage];
+  if (typeof initializer === "function") {
+    initializer();
+  }
+});
+
+window.addEventListener("hashchange", initNavigationHighlight);

@@ -9,7 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./home.css" />
 </head>
-<body>
+<body data-page="agendar">
+  <!-- data-page permite al JavaScript compartir dinámicas específicas de esta pestaña de reservas. -->
   <div class="layout">
     <header class="site-header">
       <div class="brand">
@@ -22,11 +23,11 @@
         </div>
       </div>
       <nav class="site-nav">
-        <a href="./home.html#inicio">Inicio</a>
-        <a href="./valores.html">Valores</a>
-        <a href="./quienes.html">¿Quiénes somos?</a>
-        <a href="./agendar.html">Agendar hora</a>
-        <a href="#">Seguimiento</a>
+        <a data-nav-target="home" href="./home.html#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="seguimiento" href="#">Seguimiento</a>
       </nav>
     </header>
 
@@ -41,17 +42,18 @@
       </header>
 
       <section class="booking__shell">
+        <!-- Ajusta el fondo y los bordes de este contenedor en home.css dentro de .booking__shell. -->
         <aside class="booking__sidebar">
           <div class="booking__sidebar-head">
             <span class="booking__category">Kinesiología</span>
             <p>Explora nuestro equipo y selecciona a quien acompañará tu proceso.</p>
           </div>
 
-           <ul class="booking__list" role="tablist" data-professional-list>
+           <ul class="booking__list" role="tablist" data-professional-list></ul>
             <li class="booking__list-placeholder">
               <div class="booking-card" aria-hidden="true">
                 <span class="booking-card__info">
-                   <strong>Cargando profesionales…</strong>
+                    <strong>Cargando profesionales…</strong>
                   <span>Activa JavaScript si este mensaje no desaparece.</span>
                 </span>
               </div>

@@ -111,6 +111,15 @@ a {
   transform: scaleX(1);
 }
 
+/* El script global añade esta clase para resaltar la página activa en el menú. */
+.site-nav a.is-active {
+  color: var(--accent);
+}
+
+.site-nav a.is-active::after {
+  transform: scaleX(1);
+}
+
 /* ---------- Pestaña Inicio ---------- */
 
 .hero {
@@ -124,6 +133,27 @@ a {
   background: linear-gradient(135deg, rgba(6, 54, 46, 0.9), rgba(17, 82, 72, 0.9));
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+/* app.js añade .is-ready para animar suavemente la entrada del banner principal. */
+.has-js .hero {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.has-js .hero.is-ready {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-js .hero,
+  .has-js .hero.is-ready {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .hero::after {
@@ -699,6 +729,16 @@ a {
 .team-card:hover {
   transform: translateY(-6px);
   box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.3), 0 30px 48px rgba(3, 21, 18, 0.6);
+}
+
+/* app.js agrega esta clase para resaltar el perfil seleccionado en ¿Quiénes somos? */
+.team-card.is-active {
+  transform: translateY(-8px);
+  box-shadow: inset 0 0 0 1px rgba(109, 240, 192, 0.42), 0 34px 58px rgba(3, 21, 18, 0.65);
+}
+
+.team-card.is-active .team-card__photo::after {
+  transform: scale(1.06);
 }
 
 .team-card__photo {
@@ -1279,26 +1319,49 @@ a {
   display: flex;
   flex-direction: column;
   gap: clamp(32px, 5vw, 56px);
+  align-items: center;
 }
 
 .booking__intro {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
   max-width: 720px;
+  margin-inline: auto;
+  padding: clamp(24px, 6vw, 48px);
+  border-radius: calc(var(--radius-lg) + 8px);
+  /* Modifica este fondo translúcido para personalizar el encabezado del agendamiento. */
+  background: rgba(9, 54, 46, 0.55);
+  border: 1px solid rgba(109, 240, 192, 0.18);
+  box-shadow: 0 26px 52px rgba(3, 17, 14, 0.5);
+  backdrop-filter: blur(14px);
+  text-align: center;
+}
+
+.booking__intro h1 {
+  font-size: clamp(2.2rem, 5vw, 3rem);
+}
+
+.booking__intro p {
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 540px;
+  margin-inline: auto;
 }
 
 .booking__tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 6px 18px;
   border-radius: 999px;
   font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: rgba(109, 240, 192, 0.12);
+  background: rgba(109, 240, 192, 0.16);
   color: var(--accent);
+  align-self: center;
 }
 
 .booking__shell {
@@ -1306,6 +1369,15 @@ a {
   grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
   gap: clamp(24px, 4vw, 40px);
   align-items: stretch;
+  width: min(100%, 1080px);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 48px);
+  border-radius: calc(var(--radius-lg) + 14px);
+  /* Ajusta el fondo principal del módulo de reservas en esta regla. */
+  background: rgba(6, 37, 32, 0.65);
+  border: 1px solid rgba(109, 240, 192, 0.14);
+  box-shadow: 0 32px 60px rgba(3, 16, 13, 0.55);
+  backdrop-filter: blur(18px);
 }
 
 .booking__sidebar {
@@ -1314,8 +1386,10 @@ a {
   gap: 24px;
   padding: clamp(20px, 4vw, 32px);
   border-radius: var(--radius-lg);
-  background: linear-gradient(145deg, rgba(5, 36, 31, 0.85), rgba(18, 84, 72, 0.9));
-  box-shadow: var(--shadow);
+  background: rgba(12, 64, 55, 0.45);
+  border: 1px solid rgba(109, 240, 192, 0.12);
+  box-shadow: 0 22px 44px rgba(3, 21, 17, 0.48);
+  backdrop-filter: blur(14px);
 }
 
 .booking__sidebar-head {
@@ -1415,8 +1489,9 @@ a {
   gap: clamp(24px, 4vw, 40px);
   padding: clamp(24px, 4vw, 44px);
   border-radius: var(--radius-lg);
-  background: linear-gradient(160deg, rgba(8, 42, 37, 0.92), rgba(16, 76, 66, 0.88));
-  box-shadow: var(--shadow);
+ background: rgba(8, 48, 41, 0.62);
+  border: 1px solid rgba(109, 240, 192, 0.12);
+  box-shadow: 0 28px 52px rgba(3, 18, 15, 0.55);
   position: relative;
   overflow: hidden;
 }
@@ -1604,8 +1679,8 @@ a {
 .booking__help {
   padding: 24px;
   border-radius: 20px;
-  background: rgba(5, 30, 26, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(5, 36, 31, 0.55);
+  border: 1px solid rgba(109, 240, 192, 0.16);
 }
 
 .booking__help p {
