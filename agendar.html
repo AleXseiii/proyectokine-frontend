@@ -49,14 +49,20 @@
             <p>Explora nuestro equipo y selecciona a quien acompañará tu proceso.</p>
           </div>
 
-           <ul class="booking__list" role="tablist" data-professional-list></ul>
-            <li class="booking__list-placeholder">
-              <div class="booking-card" aria-hidden="true">
+           <ul class="booking__list" role="tablist" data-professional-list>
+            <li class="booking__list-placeholder" data-professional-placeholder>
+              <div class="booking-card booking-card--placeholder" aria-live="polite">
+                <span class="booking-card__loader" aria-hidden="true"></span>
                 <span class="booking-card__info">
-                    <strong>Cargando profesionales…</strong>
-                  <span>Activa JavaScript si este mensaje no desaparece.</span>
+                    <strong>Sincronizando agenda en tiempo real…</strong>
+                  <span>En segundos verás a los especialistas con horarios actualizados</span>
                 </span>
               </div>
+              <p class="booking__placeholder-help">
+                ¿Prefieres agendar de inmediato? Escríbenos a
+                <a href="https://wa.me/56912345678" target="_blank" rel="noopener">WhatsApp</a>
+                o llama al <a href="tel:+56212345678">+56 2 1234 5678</a> y coordinamos por ti.
+              </p>
             </li>
           </ul>
           <!-- Reemplaza las fotos de los profesionales modificando las clases .booking-card__avatar--nombre en home.css -->
