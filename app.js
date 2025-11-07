@@ -141,6 +141,23 @@ const scheduleProfessionalMap = scheduleProfessionals.reduce((acc, professional)
   return acc;
 }, {});
 
+// Ajusta el porcentaje de días que se bloquean dinámicamente cuando no hay información explícita.
+// Usa valores entre 0 y 1. Ejemplo: 0.25 equivale a un 25% de días bloqueados.
+const RANDOM_BLOCK_RATE = 0.25;
+// Ajusta el rango de variación del porcentaje anterior por cada profesional y semana.
+const RANDOM_BLOCK_VARIANCE = 0.05;
+
+// Define los tiempos de animación principales del carrusel y los desplegables.
+const SLIDE_DURATION = 240; // ms
+const ACCORDION_DURATION = 200; // ms
+const BOUNCE_DURATION = 220; // ms
+
+// Define la distancia máxima del efecto de rebote al intentar retroceder la semana bloqueada.
+const BOUNCE_DISTANCE_PX = 14;
+
+// Controla la sensibilidad del gesto de swipe en dispositivos táctiles.
+const SWIPE_THRESHOLD_PX = 50;
+
 // Ajusta este valor para definir hasta qué hora se considera "mañana" en la separación de bloques.
 const MORNING_END_HOUR = 12;
 
@@ -241,6 +258,43 @@ const scheduleAvailabilityOverrides = {
 
 const weekAvailabilityCache = new Map();
 
+function seededRandom(seed) {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) | 0;
+  }
+  const result = Math.abs(Math.sin(hash) * 10000);
+  return result - Math.floor(result);
+}
+
+function getDynamicBlockRate(weekStart, professionalId) {
+  const weekKey = formatDateKey(weekStart);
+  const variation = (seededRandom(`${professionalId}:${weekKey}`) * 2 - 1) * RANDOM_BLOCK_VARIANCE;
+  const rate = RANDOM_BLOCK_RATE + variation;
+  return Math.min(1, Math.max(0, rate));
+}
+
+function shouldBlockByAssumption(weekStart, dateKey, professionalId) {
+  const threshold = getDynamicBlockRate(weekStart, professionalId);
+  return seededRandom(`${professionalId}:${dateKey}`) < threshold;
+}
+
+function applyDynamicAvailability(availability, weekStart) {
+  Object.entries(availability).forEach(([dateKey, dayAvailability]) => {
+    scheduleProfessionals.forEach((professional) => {
+      const override = scheduleAvailabilityOverrides[dateKey]?.[professional.id];
+      if (override !== undefined) return;
+
+      const slots = dayAvailability[professional.id];
+      if (!Array.isArray(slots) || !slots.length) return;
+
+      if (shouldBlockByAssumption(weekStart, dateKey, professional.id)) {
+        dayAvailability[professional.id] = [];
+      }
+    });
+  });
+}
+
 function formatDateKey(date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -304,6 +358,8 @@ function getWeekAvailability(weekStart) {
       });
     }
   }
+
+  applyDynamicAvailability(availability, weekStart);
 
   weekAvailabilityCache.set(cacheKey, availability);
   return availability;
@@ -382,6 +438,13 @@ function initSchedulePage() {
   const scheduleRoot = document.querySelector(".schedule");
   if (!scheduleRoot) return;
 
+   scheduleRoot.style.setProperty("--schedule-slide-duration", `${SLIDE_DURATION}ms`);
+  scheduleRoot.style.setProperty("--schedule-accordion-duration", `${ACCORDION_DURATION}ms`);
+  scheduleRoot.style.setProperty("--schedule-bounce-duration", `${BOUNCE_DURATION}ms`);
+  scheduleRoot.style.setProperty("--schedule-bounce-distance", `${BOUNCE_DISTANCE_PX}px`);
+
+  const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  
   const professionalSelect = scheduleRoot.querySelector("[data-schedule-professional]");
   const weekLabel = scheduleRoot.querySelector("[data-schedule-week-label]");
   const weekContainer = scheduleRoot.querySelector("[data-schedule-week]");
@@ -397,6 +460,8 @@ function initSchedulePage() {
   const priceElement = scheduleRoot.querySelector("[data-schedule-price]");
   const serviceElement = scheduleRoot.querySelector("[data-schedule-service]");
   const selectionContainer = scheduleRoot.querySelector("[data-schedule-selection]");
+  const prevButton = scheduleRoot.querySelector("[data-schedule-prev]");
+  const nextButton = scheduleRoot.querySelector("[data-schedule-next]");
 
   const slotGroups = Array.from(scheduleRoot.querySelectorAll("[data-slot-group]"));
   const slotContainers = slotGroups.reduce((acc, group) => {
@@ -407,6 +472,25 @@ function initSchedulePage() {
     }
     return acc;
   }, {});
+
+  if (slotsPanel) {
+    slotsPanel.hidden = false;
+    slotsPanel.dataset.state = "closed";
+    slotsPanel.style.setProperty("--schedule-slots-height", "0px");
+    slotsPanel.setAttribute("aria-hidden", "true");
+  }
+
+  if (weekContainer) {
+    weekContainer.setAttribute("aria-live", "polite");
+    weekContainer.setAttribute("aria-atomic", "true");
+    weekContainer.dataset.dragging = "false";
+    weekContainer.style.setProperty("--schedule-drag-offset", "0px");
+  }
+
+  if (weekLabel) {
+    weekLabel.setAttribute("aria-live", "polite");
+    weekLabel.setAttribute("aria-atomic", "true");
+  }
 
   const params = new URLSearchParams(window.location.search);
   const requestedProfessional = params.get("professional");
@@ -427,15 +511,106 @@ function initSchedulePage() {
     initialSession.title || initialSession.duration || initialSession.price
   );
 
-  const today = new Date();
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayKey = formatDateKey(now);
+
   const state = {
-    weekStart: getWeekStart(today),
+    weekStart: getWeekStart(now),
+    minWeekStart: getWeekStart(now),
     professionalId: initialProfessional,
     dateKey: null,
     time: null,
     availability: {},
-    session: hasSessionInfo ? initialSession : null
+    session: hasSessionInfo ? initialSession : null,
+    todayKey,
+    todayStart,
+    transitionDirection: 0,
+    motionDisabled: reduceMotionQuery.matches
   };
+
+  const handleMotionPreferenceChange = (event) => {
+    state.motionDisabled = event.matches;
+    scheduleRoot.classList.toggle("schedule--reduce-motion", state.motionDisabled);
+  };
+
+  scheduleRoot.classList.toggle("schedule--reduce-motion", state.motionDisabled);
+
+  if (typeof reduceMotionQuery.addEventListener === "function") {
+    reduceMotionQuery.addEventListener("change", handleMotionPreferenceChange);
+  } else if (typeof reduceMotionQuery.addListener === "function") {
+    reduceMotionQuery.addListener(handleMotionPreferenceChange);
+  }
+
+  const pointerState = {
+    active: false,
+    startX: 0,
+    lastX: 0,
+    pointerId: null
+  };
+
+  function getVisibleSlots(dateKey, slots) {
+    if (!Array.isArray(slots)) return [];
+    const date = parseDateKey(dateKey);
+    if (!date) return [];
+
+    if (dateKey === state.todayKey) {
+      const current = new Date();
+      const currentMinutes = current.getHours() * 60 + current.getMinutes();
+      return slots.filter((slot) => {
+        const [hours, minutes = "0"] = slot.split(":");
+        const slotMinutes = Number.parseInt(hours, 10) * 60 + Number.parseInt(minutes, 10);
+        return slotMinutes > currentMinutes;
+      });
+    }
+
+    if (date.getTime() < state.todayStart.getTime()) {
+      return [];
+    }
+
+    return [...slots];
+  }
+
+  function updateWeekNavState() {
+    if (prevButton) {
+      const atMinimum = state.weekStart.getTime() <= state.minWeekStart.getTime();
+      prevButton.disabled = atMinimum;
+      prevButton.setAttribute("aria-disabled", atMinimum ? "true" : "false");
+    }
+  }
+
+  function applyWeekTransition(direction) {
+    if (!weekContainer || state.motionDisabled || !direction) return;
+    delete weekContainer.dataset.transition;
+    void weekContainer.offsetHeight;
+    weekContainer.dataset.transition = direction > 0 ? "forward" : "backward";
+  }
+
+  function triggerWeekBounce(direction) {
+    if (!weekContainer || state.motionDisabled) return;
+    delete weekContainer.dataset.bounce;
+    void weekContainer.offsetHeight;
+    weekContainer.dataset.bounce = direction < 0 ? "left" : "right";
+  }
+
+  if (weekContainer) {
+    weekContainer.addEventListener("animationend", (event) => {
+      if (
+        event.animationName === "schedule-week-slide-forward" ||
+        event.animationName === "schedule-week-slide-backward"
+      ) {
+        delete weekContainer.dataset.transition;
+      }
+
+      if (
+        event.animationName === "schedule-week-bounce-left" ||
+        event.animationName === "schedule-week-bounce-right"
+      ) {
+        delete weekContainer.dataset.bounce;
+      }
+    });
+  }
 
   if (professionalSelect) {
     professionalSelect.innerHTML = "";
@@ -452,21 +627,11 @@ function initSchedulePage() {
 
     professionalSelect.addEventListener("change", () => {
       state.professionalId = professionalSelect.value;
-      state.session = null;
-
-      if (state.dateKey) {
-        const slots = state.availability[state.dateKey]?.[state.professionalId] ?? [];
-        if (!slots.length) {
-          state.dateKey = null;
-          state.time = null;
-        } else if (!slots.includes(state.time)) {
-          state.time = null;
-        }
-      }
-
-      updateProfessionalInfo();
+      state.dateKey = null;
+      state.time = null;
       renderWeek();
       renderSlots();
+      updateProfessionalInfo();
       updateSelection();
     });
   }
@@ -475,8 +640,9 @@ function initSchedulePage() {
     const professional = scheduleProfessionalMap[state.professionalId];
     if (!professional) return;
 
-    if (nameElement) nameElement.textContent = professional.name;
+    
     if (roleElement) roleElement.textContent = professional.role;
+    if (nameElement) nameElement.textContent = professional.name;
     if (modalityElement) modalityElement.textContent = professional.modality;
     if (durationElement) {
       durationElement.textContent = state.session?.duration || professional.duration;
@@ -515,6 +681,37 @@ function initSchedulePage() {
       confirmButton.setAttribute("aria-disabled", isReady ? "false" : "true");
     }
   }
+  function setSlotsPanelState(isOpen) {
+    if (!slotsPanel) return;
+
+    if (!isOpen) {
+      if (slotsPanel.dataset.state === "closed") {
+        slotsPanel.style.setProperty("--schedule-slots-height", "0px");
+        slotsPanel.setAttribute("aria-hidden", "true");
+        return;
+      }
+
+      const measuredHeight = slotsPanel.scrollHeight;
+      slotsPanel.style.setProperty("--schedule-slots-height", `${measuredHeight}px`);
+      slotsPanel.dataset.state = "closing";
+      slotsPanel.setAttribute("aria-hidden", "true");
+
+      window.requestAnimationFrame(() => {
+        if (slotsPanel.dataset.state !== "closing") return;
+        slotsPanel.dataset.state = "closed";
+        slotsPanel.style.setProperty("--schedule-slots-height", "0px");
+      });
+      return;
+    }
+
+    slotsPanel.dataset.state = "open";
+    slotsPanel.setAttribute("aria-hidden", "false");
+
+    window.requestAnimationFrame(() => {
+      const measuredHeight = slotsPanel.scrollHeight;
+      slotsPanel.style.setProperty("--schedule-slots-height", `${measuredHeight}px`);
+    });
+  }
 
   function renderWeek() {
     state.availability = getWeekAvailability(state.weekStart);
@@ -523,6 +720,9 @@ function initSchedulePage() {
     }
 
     if (!weekContainer) return;
+    const direction = state.transitionDirection;
+    state.transitionDirection = 0;
+
     weekContainer.innerHTML = "";
 
     for (let offset = 0; offset < 7; offset += 1) {
@@ -548,38 +748,46 @@ function initSchedulePage() {
 
       button.append(name, dayNumber);
 
-      const slots = state.availability[dateKey]?.[state.professionalId] ?? [];
-      const hasAvailability = Array.isArray(slots) && slots.length > 0;
+      const rawSlots = state.availability[dateKey]?.[state.professionalId] ?? [];
+      const visibleSlots = getVisibleSlots(dateKey, rawSlots);
+      const isToday = dateKey === state.todayKey;
+      const isPastDay = currentDate.getTime() < state.todayStart.getTime();
+      const hasAvailability = !isPastDay && visibleSlots.length > 0;
+      const isSelected = hasAvailability && state.dateKey === dateKey;
+
+      button.classList.toggle("schedule-day--today", isToday);
+      button.classList.toggle("schedule-day--selected", isSelected);
+      button.setAttribute("aria-current", isToday ? "date" : "false");
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
 
       if (!hasAvailability) {
-        button.dataset.state = "blocked";
-        button.dataset.tooltip = "Sin disponibilidad";
+        const tooltip = isPastDay ? "Agenda finalizada" : "Sin disponibilidad";
+        button.dataset.state = isPastDay ? "past" : "blocked";
+        button.dataset.tooltip = tooltip;
         button.setAttribute("aria-disabled", "true");
         button.tabIndex = -1;
-        button.setAttribute("aria-pressed", "false");
         button.setAttribute(
           "aria-label",
-          `${capitalize(weekdayLabel)} ${currentDate.getDate()} de ${capitalize(monthLabel)}. Sin disponibilidad`
+          `${capitalize(weekdayLabel)} ${currentDate.getDate()} de ${capitalize(monthLabel)}. ${tooltip}`
         );
-        button.title = "Sin disponibilidad";
+        button.title = tooltip;
         weekContainer.appendChild(button);
         continue;
       }
 
       const info = document.createElement("span");
       info.className = "schedule-day__info";
-      info.textContent = `${slots.length} ${slots.length === 1 ? "hora" : "horas"}`;
+      info.textContent = `${visibleSlots.length} ${
+        visibleSlots.length === 1 ? "hora" : "horas"
+      }`;
       button.append(info);
 
-      const isSelected = state.dateKey === dateKey;
-      button.classList.toggle("schedule-day--selected", isSelected);
-      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
 
       button.setAttribute(
         "aria-label",
         `${capitalize(weekdayLabel)} ${currentDate.getDate()} de ${capitalize(monthLabel)}. ${
-          slots.length
-        } ${slots.length === 1 ? "hora disponible" : "horas disponibles"}`
+           visibleSlots.length
+        } ${visibleSlots.length === 1 ? "hora disponible" : "horas disponibles"}`
       );
       button.title = "Ver horarios disponibles";
 
@@ -593,26 +801,38 @@ function initSchedulePage() {
 
       weekContainer.appendChild(button);
     }
+
+    applyWeekTransition(direction);
+    updateWeekNavState();
   }
 
   function renderSlots() {
     const hasSelection = Boolean(state.dateKey);
-    const slots = hasSelection
+    const rawSlots = hasSelection
       ? state.availability[state.dateKey]?.[state.professionalId] ?? []
       : [];
-    const periods = splitSlotsByPeriod(Array.isArray(slots) ? slots : []);
+     const visibleSlots = hasSelection ? getVisibleSlots(state.dateKey, rawSlots) : [];
 
-    if (slotsPanel) {
-      slotsPanel.hidden = !hasSelection;
+    if (state.time && !visibleSlots.includes(state.time)) {
+      state.time = null;
     }
 
+    const shouldShowSlots = hasSelection && visibleSlots.length > 0;
+    const periods = splitSlotsByPeriod(visibleSlots);
+
     if (slotDayLabel) {
-      slotDayLabel.textContent = hasSelection ? formatDayLabel(state.dateKey) : "";
+      if (!hasSelection) {
+        slotDayLabel.textContent = "";
+      } else if (shouldShowSlots) {
+        slotDayLabel.textContent = formatDayLabel(state.dateKey);
+      } else {
+        slotDayLabel.textContent = `${formatDayLabel(state.dateKey)} • Sin horarios disponibles`;
+      }
     }
 
     Object.entries(slotContainers).forEach(([period, { group, list }]) => {
       list.innerHTML = "";
-      if (!hasSelection) {
+      if (!shouldShowSlots) {
         group.hidden = true;
         return;
       }
@@ -643,6 +863,8 @@ function initSchedulePage() {
         list.appendChild(button);
       });
     });
+
+    setSlotsPanelState(shouldShowSlots);
   }
 
   if (confirmButton) {
@@ -656,35 +878,110 @@ function initSchedulePage() {
     });
   }
 
-  const prevButton = scheduleRoot.querySelector("[data-schedule-prev]");
-  const nextButton = scheduleRoot.querySelector("[data-schedule-next]");
+  function changeWeek(dayOffset) {
+    if (!dayOffset) return;
+
+    const direction = dayOffset > 0 ? 1 : -1;
+    const target = addDays(state.weekStart, dayOffset);
+
+    if (direction < 0 && target.getTime() < state.minWeekStart.getTime()) {
+      triggerWeekBounce(-1);
+      updateWeekNavState();
+      return;
+    }
+
+    state.weekStart = target;
+    state.dateKey = null;
+    state.time = null;
+    state.transitionDirection = direction;
+    renderWeek();
+    renderSlots();
+    updateSelection();
+  }
 
   if (prevButton) {
     prevButton.addEventListener("click", () => {
-      state.weekStart = addDays(state.weekStart, -7);
-      state.dateKey = null;
-      state.time = null;
-      renderWeek();
-      renderSlots();
-      updateSelection();
+      changeWeek(-7);
     });
   }
 
   if (nextButton) {
     nextButton.addEventListener("click", () => {
-      state.weekStart = addDays(state.weekStart, 7);
-      state.dateKey = null;
-      state.time = null;
-      renderWeek();
-      renderSlots();
-      updateSelection();
+      changeWeek(7);
     });
   }
+
+  function onPointerDown(event) {
+    if (!weekContainer) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    pointerState.active = true;
+    pointerState.startX = event.clientX;
+    pointerState.lastX = event.clientX;
+    pointerState.pointerId = event.pointerId;
+    weekContainer.dataset.dragging = "true";
+
+    if (!state.motionDisabled) {
+      weekContainer.style.setProperty("--schedule-drag-offset", "0px");
+    }
+
+    try {
+      weekContainer.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // Ignora navegadores que no soportan setPointerCapture.
+    }
+  }
+
+  function onPointerMove(event) {
+    if (!pointerState.active || !weekContainer) return;
+    pointerState.lastX = event.clientX;
+    if (state.motionDisabled) return;
+    const delta = pointerState.lastX - pointerState.startX;
+    weekContainer.style.setProperty("--schedule-drag-offset", `${delta}px`);
+  }
+
+  function onPointerEnd() {
+    if (!pointerState.active || !weekContainer) return;
+
+    if (pointerState.pointerId !== null) {
+      try {
+        weekContainer.releasePointerCapture(pointerState.pointerId);
+      } catch (error) {
+        // Ignora navegadores que no soportan releasePointerCapture.
+      }
+    }
+
+    pointerState.active = false;
+    pointerState.pointerId = null;
+    weekContainer.dataset.dragging = "false";
+
+    if (!state.motionDisabled) {
+      weekContainer.style.setProperty("--schedule-drag-offset", "0px");
+    }
+
+    const delta = pointerState.lastX - pointerState.startX;
+    pointerState.startX = 0;
+    pointerState.lastX = 0;
+
+    if (Math.abs(delta) >= SWIPE_THRESHOLD_PX) {
+      changeWeek(delta < 0 ? 7 : -7);
+    }
+  }
+
+  if (weekContainer) {
+    weekContainer.addEventListener("pointerdown", onPointerDown);
+    weekContainer.addEventListener("pointermove", onPointerMove);
+    weekContainer.addEventListener("pointerup", onPointerEnd);
+    weekContainer.addEventListener("pointercancel", onPointerEnd);
+    weekContainer.addEventListener("pointerleave", onPointerEnd);
+  }
+
 
   updateProfessionalInfo();
   renderWeek();
   renderSlots();
   updateSelection();
+  updateWeekNavState();
 }
 function getCurrentPage() {
   const { page } = document.body?.dataset ?? {};
