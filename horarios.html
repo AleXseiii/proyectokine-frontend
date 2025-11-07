@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de salud y Bienestar - Horarios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./home.css" />
+</head>
+<body data-page="horarios">
+  <!-- data-page permite que app.js aplique la lógica específica de la agenda interactiva. -->
+  <div class="layout">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand__logo">
+          <!-- Sustituye este contenedor por un <img> si deseas mostrar el logotipo institucional. -->
+        </div>
+        <div class="brand__text">
+          <span>Centro de salud y</span>
+          <span class="brand__text--bold">Bienestar</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a data-nav-target="home" href="./home.html#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="seguimiento" href="#">Seguimiento</a>
+      </nav>
+    </header>
+
+    <main class="schedule" aria-labelledby="schedule-title">
+      <a class="schedule__back" href="./agendar.html">&lt; Volver</a>
+
+      <div class="schedule__layout">
+        <section class="schedule__panel" aria-live="polite">
+          <header class="schedule__header">
+            <div>
+              <span class="schedule__subtitle">Selecciona tu horario disponible</span>
+              <h1 id="schedule-title">Agenda semanal</h1>
+              <span class="schedule__week-label" data-schedule-week-label></span>
+            </div>
+            <div class="schedule__filters">
+              <label class="schedule__select" aria-label="Seleccionar kinesiólogo">
+                <span>Profesional</span>
+                <select data-schedule-professional>
+                  <!-- Las opciones se crean dinámicamente desde app.js -->
+                </select>
+              </label>
+            </div>
+          </header>
+
+          <section class="schedule__week" aria-label="Disponibilidad semanal">
+            <button class="schedule__week-nav" type="button" data-schedule-prev aria-label="Semana anterior">
+              <span aria-hidden="true">&#x2039;</span>
+            </button>
+            <div class="schedule-week" data-schedule-week role="list"></div>
+            <button class="schedule__week-nav" type="button" data-schedule-next aria-label="Semana siguiente">
+              <span aria-hidden="true">&#x203A;</span>
+            </button>
+          </section>
+
+          <section class="schedule__slots" aria-live="polite" data-schedule-slots hidden>
+            <header class="schedule__slots-header">
+              <h2>Horarios disponibles</h2>
+              <span data-schedule-day-label></span>
+            </header>
+            <div class="schedule__slot-groups">
+              <div class="schedule__slot-group" data-slot-group="morning" hidden>
+                <h3>Mañana</h3>
+                <div class="schedule__slot-list" data-slot-period="morning"></div>
+              </div>
+              <div class="schedule__slot-group" data-slot-group="afternoon" hidden>
+                <h3>Tarde</h3>
+                <div class="schedule__slot-list" data-slot-period="afternoon"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <aside class="schedule__summary">
+          <article class="schedule-summary" aria-live="polite">
+            <header class="schedule-summary__header">
+              <div class="schedule-profile">
+                <div class="schedule-profile__photo schedule-profile__photo--lissette" data-schedule-photo aria-hidden="true"></div>
+                <!-- Reemplaza la imagen principal del perfil editando las clases schedule-profile__photo--* en home.css. -->
+                <div class="schedule-profile__info">
+                  <span class="schedule-profile__role" data-schedule-role></span>
+                  <h2 data-schedule-name></h2>
+                </div>
+              </div>
+              <p class="schedule-summary__intro">
+                Confirmaremos la reserva apenas selecciones día y hora disponibles.
+              </p>
+            </header>
+
+            <section class="schedule-summary__body">
+              <div class="schedule-summary__service">
+                <h3 data-schedule-service>Sesión de kinesiología isapre</h3>
+                <ul>
+                  <li><strong>Modalidad:</strong> <span data-schedule-modality>Presencial</span></li>
+                  <li><strong>Duración:</strong> <span data-schedule-duration>45 minutos</span></li>
+                  <li><strong>Precio:</strong> <span data-schedule-price>$35.000 CLP</span></li>
+                </ul>
+                <!-- Ajusta los datos del servicio modificando los atributos data-schedule-* desde app.js. -->
+              </div>
+
+              <div class="schedule-summary__selection" data-schedule-selection>
+                <span>Hora seleccionada</span>
+                <strong data-schedule-selection-label>Ninguna hora seleccionada</strong>
+              </div>
+            </section>
+
+            <footer class="schedule-summary__footer">
+              <button class="schedule-summary__action" type="button" data-schedule-confirm disabled>
+                Continuar
+              </button>
+            </footer>
+          </article>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
