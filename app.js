@@ -462,6 +462,7 @@ function initSchedulePage() {
   const selectionContainer = scheduleRoot.querySelector("[data-schedule-selection]");
   const prevButton = scheduleRoot.querySelector("[data-schedule-prev]");
   const nextButton = scheduleRoot.querySelector("[data-schedule-next]");
+  const emptyMessage = scheduleRoot.querySelector("[data-schedule-empty]");
 
   const slotGroups = Array.from(scheduleRoot.querySelectorAll("[data-slot-group]"));
   const slotContainers = slotGroups.reduce((acc, group) => {
@@ -689,6 +690,7 @@ function initSchedulePage() {
         slotsPanel.style.setProperty("--schedule-slots-height", "0px");
         slotsPanel.setAttribute("aria-hidden", "true");
         return;
+        slotsPanel.hidden = true;
       }
 
       const measuredHeight = slotsPanel.scrollHeight;
@@ -700,10 +702,12 @@ function initSchedulePage() {
         if (slotsPanel.dataset.state !== "closing") return;
         slotsPanel.dataset.state = "closed";
         slotsPanel.style.setProperty("--schedule-slots-height", "0px");
+        slotsPanel.hidden = true;
       });
+      
       return;
     }
-
+    slotsPanel.hidden = false;
     slotsPanel.dataset.state = "open";
     slotsPanel.setAttribute("aria-hidden", "false");
 
@@ -818,6 +822,7 @@ function initSchedulePage() {
     }
 
     const shouldShowSlots = hasSelection && visibleSlots.length > 0;
+    const shouldOpenPanel = hasSelection;
     const periods = splitSlotsByPeriod(visibleSlots);
 
     if (slotDayLabel) {
@@ -864,7 +869,11 @@ function initSchedulePage() {
       });
     });
 
-    setSlotsPanelState(shouldShowSlots);
+    if (emptyMessage) {
+      emptyMessage.hidden = !(hasSelection && !visibleSlots.length);
+    }
+
+    setSlotsPanelState(shouldOpenPanel);
   }
 
   if (confirmButton) {
