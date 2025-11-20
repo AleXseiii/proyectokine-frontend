@@ -476,7 +476,7 @@ function initSchedulePage() {
     weekStart: getWeekStart(now),
     minWeekStart: getWeekStart(now),
     professionalId: initialProfessional,
-    dateKey: null,
+    dateKey: todayKey,
     time: null,
     availability: {},
     session: hasSessionInfo ? initialSession : null,
@@ -714,17 +714,17 @@ function initSchedulePage() {
       const visibleSlots = getVisibleSlots(dateKey, rawSlots);
       const isToday = dateKey === state.todayKey;
       const isPastDay = currentDate.getTime() < state.todayStart.getTime();
-      const hasAvailability = !isPastDay && visibleSlots.length > 0;
-      const isSelected = hasAvailability && state.dateKey === dateKey;
+      const hasSlots = visibleSlots.length > 0;
+      const isSelected = state.dateKey === dateKey;
 
       button.classList.toggle("schedule-day--today", isToday);
       button.classList.toggle("schedule-day--selected", isSelected);
       button.setAttribute("aria-current", isToday ? "date" : "false");
       button.setAttribute("aria-pressed", isSelected ? "true" : "false");
 
-      if (!hasAvailability) {
-        const tooltip = isPastDay ? "Agenda finalizada" : "Sin disponibilidad";
-        button.dataset.state = isPastDay ? "past" : "blocked";
+       if (isPastDay) {
+        const tooltip = "Agenda finalizada";
+        button.dataset.state = "past";
         button.dataset.tooltip = tooltip;
         button.setAttribute("aria-disabled", "true");
         button.tabIndex = -1;
@@ -737,21 +737,32 @@ function initSchedulePage() {
         continue;
       }
 
-      const info = document.createElement("span");
-      info.className = "schedule-day__info";
-      info.textContent = `${visibleSlots.length} ${
-        visibleSlots.length === 1 ? "hora" : "horas"
-      }`;
-      button.append(info);
+       if (!hasSlots) {
+        button.dataset.state = "blocked";
+        button.dataset.tooltip = "Sin horarios disponibles";
+        button.setAttribute(
+          "aria-label",
+          `${capitalize(weekdayLabel)} ${currentDate.getDate()} de ${capitalize(
+            monthLabel
+          )}. Sin horarios disponibles`
+        );
+        button.title = "Ver horarios";
+      } else {
+        const info = document.createElement("span");
+        info.className = "schedule-day__info";
+        info.textContent = `${visibleSlots.length} ${
+          visibleSlots.length === 1 ? "hora" : "horas"
+        }`;
+        button.append(info);
 
-
-      button.setAttribute(
-        "aria-label",
-        `${capitalize(weekdayLabel)} ${currentDate.getDate()} de ${capitalize(monthLabel)}. ${
-           visibleSlots.length
-        } ${visibleSlots.length === 1 ? "hora disponible" : "horas disponibles"}`
-      );
-      button.title = "Ver horarios disponibles";
+        button.setAttribute(
+          "aria-label",
+          `${capitalize(weekdayLabel)} ${currentDate.getDate()} de ${capitalize(monthLabel)}. ${
+            visibleSlots.length
+          } ${visibleSlots.length === 1 ? "hora disponible" : "horas disponibles"}`
+        );
+        button.title = "Ver horarios disponibles";
+      }
 
       button.addEventListener("click", () => {
         state.dateKey = dateKey;
