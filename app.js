@@ -767,6 +767,7 @@ function initSchedulePage() {
       button.addEventListener("click", () => {
         state.dateKey = dateKey;
         state.time = null;
+        setSlotsPanelState(true);
         renderWeek();
         renderSlots();
         updateSelection();
@@ -784,8 +785,7 @@ function initSchedulePage() {
     const rawSlots = hasSelection
       ? state.availability[state.dateKey]?.[state.professionalId] ?? []
       : [];
-     const visibleSlots = hasSelection ? getVisibleSlots(state.dateKey, rawSlots) : [];
-
+    const visibleSlots = hasSelection ? getVisibleSlots(state.dateKey, rawSlots) : [];
     if (state.time && !visibleSlots.includes(state.time)) {
       state.time = null;
     }
@@ -839,7 +839,11 @@ function initSchedulePage() {
     });
 
     if (emptyMessage) {
-      emptyMessage.hidden = !(hasSelection && !visibleSlots.length);
+      const showEmpty = hasSelection && !visibleSlots.length;
+      emptyMessage.hidden = !showEmpty;
+      if (showEmpty) {
+        emptyMessage.textContent = "Sin horarios disponibles para este día.";
+      }
     }
 
     setSlotsPanelState(shouldOpenPanel);
