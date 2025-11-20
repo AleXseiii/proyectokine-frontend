@@ -485,7 +485,9 @@ function initSchedulePage() {
     transitionDirection: 0,
     motionDisabled: reduceMotionQuery.matches
   };
-
+    // Punto único para alterar el cálculo de la semana inicial y el “día por defecto”.
+  // Si necesitas mostrar otra semana o preseleccionar un día distinto (p.ej. siempre lunes),
+  // ajusta weekStart/dateKey aquí antes de llamar a la función de arranque.
   const handleMotionPreferenceChange = (event) => {
     state.motionDisabled = event.matches;
     scheduleRoot.classList.toggle("schedule--reduce-motion", state.motionDisabled);
@@ -821,14 +823,9 @@ function initSchedulePage() {
         button.title = "Ver horarios disponibles";
       }
 
-       button.addEventListener("click", () => selectDay(dateKey));
-      button.addEventListener("keydown", (event) => {
-        const isActivationKey = event.key === "Enter" || event.key === " " || event.key === "Spacebar";
-        if (!isActivationKey) return;
-        event.preventDefault();
-        selectDay(dateKey);
-
-      });
+      // Maneja la selección solo con click para evitar conflictos con activaciones por teclado.
+      // Si más adelante quieres reactivar navegación por Enter/Space, agrega aquí el listener de teclado.
+      button.addEventListener("click", () => selectDay(dateKey));
 
       weekContainer.appendChild(button);
     }
@@ -1026,11 +1023,17 @@ function initSchedulePage() {
   }
 
 
-  updateProfessionalInfo();
-  renderWeek();
-  renderSlots();
-  updateSelection();
-  updateWeekNavState();
+const initializeScheduleView = () => {
+    // Este inicializador pinta la semana completa apenas carga la página y fija el día activo por defecto.
+    // Ajusta aquí si quieres variar la lógica del arranque (p.ej. cargar siempre la próxima semana).
+    updateProfessionalInfo();
+    renderWeek();
+    renderSlots();
+    updateSelection();
+    updateWeekNavState();
+  };
+
+  initializeScheduleView();
 }
 
 function initPatientDataPage() {
@@ -1085,6 +1088,8 @@ function initPatientDataPage() {
 
   const rutInput = root.querySelector("[data-patient-rut]");
   const rutError = root.querySelector("[data-rut-error]");
+  const countrySelect = root.querySelector("[data-phone-country]");
+  const phonePrefix = root.querySelector("[data-phone-prefix]");
   const phoneInput = root.querySelector("[data-patient-phone]");
   const phoneError = root.querySelector("[data-phone-error]");
   const sendButton = root.querySelector("[data-send-code]");
@@ -1099,7 +1104,20 @@ function initPatientDataPage() {
     codeSent: false,
     codeValidated: false,
     phoneDigits: "",
-    lastSentPhone: ""
+    lastSentPhone: "",
+    lastDialCode: ""
+  };
+
+  const phoneCountries = [
+    { code: "CL", name: "Chile", dialCode: "+56", flag: "🇨🇱", minLength: 9, maxLength: 9, example: "9XXXXXXXX" },
+    { code: "AR", name: "Argentina", dialCode: "+54", flag: "🇦🇷", minLength: 10, maxLength: 10, example: "11XXXXXXXX" }
+    // Añade más países aquí si necesitas ampliar la lista de prefijos.
+  ];
+
+  const getCountryByCode = (code) => phoneCountries.find((item) => item.code === code);
+  const getSelectedCountry = () => {
+    const current = getCountryByCode(countrySelect?.value ?? "");
+    return current ?? phoneCountries.find((item) => item.code === "CL") ?? phoneCountries[0];
   };
 
   const clampDigits = (value = "", maxLength = 0) => value.replace(/\D/g, "").slice(0, maxLength || undefined);
@@ -1181,34 +1199,63 @@ function initPatientDataPage() {
 
   const maskPhone = (digits) => {
     if (!digits) return "";
-    const left = digits.slice(0, 4);
-    const right = digits.slice(4);
-    return `${left} ${right}`.trim();
+   return digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
   };
+
+  const getExpectedLength = (country) => country.maxLength ?? country.minLength ?? 9;
+
+  const validatePhoneDigits = (digits, country) => {
+    const expected = getExpectedLength(country);
+    if (!digits.length) return { valid: false, message: "" };
+    if (digits.length < expected) {
+      return { valid: false, message: `Ingresa ${expected} dígitos para ${country.name}.` };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const clampPhoneDigits = (value, country) => clampDigits(value, country.maxLength ?? 12);
 
   const updateConfirmButtonState = () => {
     if (!confirmCodeButton) return;
     const code = clampDigits(codeInput?.value ?? "", 6);
-    const canConfirm = verificationState.codeSent && code.length === 6;
+    const country = getSelectedCountry();
+    const phoneValid = validatePhoneDigits(verificationState.phoneDigits, country).valid;
+    const canConfirm = verificationState.codeSent && code.length === 6 && phoneValid;
     confirmCodeButton.disabled = !canConfirm || verificationState.verifying;
   };
 
+  const updatePhonePrefix = () => {
+    const country = getSelectedCountry();
+    if (phonePrefix) {
+      phonePrefix.textContent = `${country.flag} ${country.dialCode}`;
+    }
+    if (phoneInput) {
+      phoneInput.placeholder = country.example ?? "";
+    }
+    verificationState.lastDialCode = country.dialCode;
+    // Si quieres bloquear el prefijo, deshabilita el select o elimina el listener de cambio.
+  };
+  
   const updatePhoneState = () => {
     if (!phoneInput) return;
-    const digits = clampDigits(phoneInput.value, 8);
+    const country = getSelectedCountry();
+    const digits = clampPhoneDigits(phoneInput.value, country);
     phoneInput.value = digits;
     verificationState.phoneDigits = digits;
     if (phoneError) {
-      phoneError.textContent = digits.length === 8 ? "" : "Completa los 8 dígitos del celular.";
+    const result = validatePhoneDigits(digits, country);
+      phoneError.textContent = result.valid ? "" : result.message;
     }
     updateConfirmButtonState();
   };
 
   const sendVerificationCode = async () => {
     if (!sendButton) return;
+    const country = getSelectedCountry();
     const digits = verificationState.phoneDigits;
-    if (digits.length < 8) {
-      if (phoneError) phoneError.textContent = "Completa los 8 dígitos del celular.";
+    const validation = validatePhoneDigits(digits, country);
+    if (!validation.valid) {
+      if (phoneError) phoneError.textContent = validation.message;
       return;
     }
 
@@ -1219,18 +1266,19 @@ function initPatientDataPage() {
     }
 
     try {
-      // TODO: conectar con backend real para enviar SMS
+      // TODO: conectar con backend real para enviar SMS (Twilio u otro)
       // await fetch("/api/enviar-codigo", {
       //   method: "POST",
       //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ phone: `+569${digits}` })
+      //body: JSON.stringify({ phone: `${country.dialCode}${digits}` })
       // });
       await new Promise((resolve) => setTimeout(resolve, 400));
 
       verificationState.codeSent = true;
       verificationState.lastSentPhone = digits;
+      verificationState.lastDialCode = country.dialCode;
       if (sendFeedback) {
-        sendFeedback.textContent = `Código enviado al +56 9 ${maskPhone(digits)}`;
+      sendFeedback.textContent = `Código enviado al ${country.dialCode} ${maskPhone(digits)}`;
       }
       if (codeError) codeError.textContent = "";
       updateConfirmButtonState();
@@ -1265,7 +1313,10 @@ function initPatientDataPage() {
       // const response = await fetch("/api/verificar-codigo", {
       //   method: "POST",
       //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ phone: `+569${verificationState.phoneDigits}`, code })
+      //   body: JSON.stringify({
+      //     phone: `${verificationState.lastDialCode}${verificationState.phoneDigits}`,
+      //     code
+      //   })
       // });
       // const result = await response.json();
       // const isValid = Boolean(result?.valid);
@@ -1281,6 +1332,24 @@ function initPatientDataPage() {
       updateConfirmButtonState();
     }
   };
+
+   if (countrySelect) {
+    // Aquí puedes fijar el prefijo por defecto o habilitar/deshabilitar el cambio de país.
+    countrySelect.value = getSelectedCountry().code;
+    countrySelect.addEventListener("change", () => {
+      updatePhonePrefix();
+      verificationState.phoneDigits = "";
+      verificationState.codeSent = false;
+      verificationState.codeValidated = false;
+      if (phoneInput) phoneInput.value = "";
+      if (sendFeedback) sendFeedback.textContent = "";
+      if (codeError) codeError.textContent = "";
+      updatePhoneState();
+    });
+  }
+
+  updatePhonePrefix();
+  updatePhoneState();
 
   if (phoneInput) {
     phoneInput.addEventListener("input", updatePhoneState);
