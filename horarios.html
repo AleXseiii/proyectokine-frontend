@@ -125,6 +125,80 @@
           </article>
         </aside>
       </div>
+      <section class="schedule-checkout" data-schedule-checkout hidden>
+        <div class="schedule-checkout__header">
+          <button class="schedule-checkout__back" type="button" data-checkout-back>&lt; Volver</button>
+          <div>
+            <span class="schedule__subtitle">Completa los datos del paciente</span>
+            <h2>Confirmar reserva</h2>
+          </div>
+        </div>
+
+        <div class="schedule-checkout__grid">
+          <section class="checkout-form" aria-label="Datos del paciente">
+            <label class="checkout-form__field">
+              <span>RUT del paciente</span>
+              <input type="text" name="rut" placeholder="12.345.678-9" />
+            </label>
+            <label class="checkout-form__field">
+              <span>Nombre y Apellido</span>
+              <input type="text" name="name" placeholder="Nombre completo" />
+            </label>
+            <label class="checkout-form__field">
+              <span>Correo electrónico</span>
+              <input type="email" name="email" placeholder="nombre@correo.com" />
+            </label>
+            <label class="checkout-form__field">
+              <span>Número celular</span>
+              <input type="tel" name="phone" placeholder="+56 9 1234 5678" />
+            </label>
+            <div class="checkout-form__verification">
+              <label class="checkout-form__field">
+                <span>Código verificador</span>
+                <input type="text" name="code" placeholder="123456" />
+              </label>
+              <button class="checkout-form__verify" type="button">Confirmar código</button>
+            </div>
+          </section>
+
+          <aside class="checkout-summary" aria-label="Resumen de la hora">
+            <header class="checkout-summary__profile">
+              <div class="schedule-profile">
+                <div class="schedule-profile__photo schedule-profile__photo--lissette" data-checkout-photo aria-hidden="true"></div>
+                <div class="schedule-profile__info">
+                  <span class="schedule-profile__role" data-checkout-role></span>
+                  <h3 data-checkout-name></h3>
+                </div>
+              </div>
+            </header>
+
+            <div class="checkout-summary__service">
+              <h3 data-checkout-service>Sesión de kinesiología</h3>
+              <p>
+                <strong>Modalidad:</strong> <span data-checkout-modality>Presencial</span><br />
+                <strong>Duración:</strong> <span data-checkout-duration>45 minutos</span><br />
+                <strong>Precio:</strong> <span data-checkout-price>$35.000 CLP</span>
+              </p>
+            </div>
+
+            <div class="checkout-summary__selection">
+              <span>Hora seleccionada</span>
+              <strong data-checkout-selection>Ninguna hora seleccionada</strong>
+            </div>
+
+            <div class="checkout-summary__notes">
+              <p class="checkout-summary__warning">
+                Importante: al agendar aceptas las políticas de cancelación y asistencia con 48 horas de anticipación.
+              </p>
+              <p class="checkout-summary__warning">
+                Si no dispones de seguro Isapre podríamos derivarte a modalidad particular, mantenimiento o teleconsulta.
+              </p>
+            </div>
+
+            <button class="schedule-summary__action" type="button">Confirmar hora</button>
+          </aside>
+        </div>
+      </section>
     </main>
   </div>
 

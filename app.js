@@ -143,7 +143,7 @@ const scheduleProfessionalMap = scheduleProfessionals.reduce((acc, professional)
 
 // Ajusta el porcentaje de días que se bloquean dinámicamente cuando no hay información explícita.
 // Usa valores entre 0 y 1. Ejemplo: 0.25 equivale a un 25% de días bloqueados.
-const RANDOM_BLOCK_RATE = 0.25;
+const RANDOM_BLOCK_RATE = 0;
 // Ajusta el rango de variación del porcentaje anterior por cada profesional y semana.
 const RANDOM_BLOCK_VARIANCE = 0.05;
 
@@ -460,6 +460,16 @@ function initSchedulePage() {
   const priceElement = scheduleRoot.querySelector("[data-schedule-price]");
   const serviceElement = scheduleRoot.querySelector("[data-schedule-service]");
   const selectionContainer = scheduleRoot.querySelector("[data-schedule-selection]");
+  const checkoutSection = scheduleRoot.querySelector("[data-schedule-checkout]");
+  const checkoutSelectionLabel = scheduleRoot.querySelector("[data-checkout-selection]");
+  const checkoutService = scheduleRoot.querySelector("[data-checkout-service]");
+  const checkoutModality = scheduleRoot.querySelector("[data-checkout-modality]");
+  const checkoutDuration = scheduleRoot.querySelector("[data-checkout-duration]");
+  const checkoutPrice = scheduleRoot.querySelector("[data-checkout-price]");
+  const checkoutProfessionalName = scheduleRoot.querySelector("[data-checkout-name]");
+  const checkoutProfessionalRole = scheduleRoot.querySelector("[data-checkout-role]");
+  const checkoutBackButton = scheduleRoot.querySelector("[data-checkout-back]");
+  const checkoutPhoto = scheduleRoot.querySelector("[data-checkout-photo]");
   const prevButton = scheduleRoot.querySelector("[data-schedule-prev]");
   const nextButton = scheduleRoot.querySelector("[data-schedule-next]");
   const emptyMessage = scheduleRoot.querySelector("[data-schedule-empty]");
@@ -662,6 +672,8 @@ function initSchedulePage() {
       });
       photo.classList.add(professional.photoClass);
     }
+
+     updateCheckoutSummary();
   }
 
   function updateSelection() {
@@ -676,12 +688,63 @@ function initSchedulePage() {
       );
     }
 
+    updateCheckoutSummary();
+
+    if (!state.dateKey || !state.time) {
+      closeCheckout();
+    }
+
     if (confirmButton) {
       const isReady = Boolean(state.dateKey && state.time);
       confirmButton.disabled = !isReady;
       confirmButton.setAttribute("aria-disabled", isReady ? "false" : "true");
     }
   }
+
+  function updateCheckoutSummary() {
+    if (!checkoutSection) return;
+
+    const professional = scheduleProfessionalMap[state.professionalId];
+    if (checkoutProfessionalName) {
+      checkoutProfessionalName.textContent = professional?.name ?? "";
+    }
+    if (checkoutProfessionalRole) {
+      checkoutProfessionalRole.textContent = professional?.role ?? "";
+    }
+    if (checkoutService) {
+      checkoutService.textContent = state.session?.title || professional?.service || "";
+    }
+    if (checkoutModality) {
+      checkoutModality.textContent = state.session?.modality || professional?.modality || "";
+    }
+    if (checkoutDuration) {
+      checkoutDuration.textContent = state.session?.duration || professional?.duration || "";
+    }
+    if (checkoutPrice) {
+      checkoutPrice.textContent = state.session?.price || professional?.price || "";
+    }
+    if (checkoutSelectionLabel) {
+      checkoutSelectionLabel.textContent = formatSelectionLabel(state.dateKey, state.time);
+    }
+    if (checkoutPhoto && professional?.photoClass) {
+      scheduleProfessionals.forEach((item) => checkoutPhoto.classList.remove(item.photoClass));
+      checkoutPhoto.classList.add(professional.photoClass);
+    }
+  }
+  function openCheckout() {
+    if (!checkoutSection || !state.dateKey || !state.time) return;
+    checkoutSection.hidden = false;
+    scheduleRoot.classList.add("schedule--checkout");
+    updateCheckoutSummary();
+    checkoutSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function closeCheckout() {
+    if (!checkoutSection) return;
+    checkoutSection.hidden = true;
+    scheduleRoot.classList.remove("schedule--checkout");
+  }
+
   function setSlotsPanelState(isOpen) {
     if (!slotsPanel) return;
 
@@ -879,11 +942,19 @@ function initSchedulePage() {
   if (confirmButton) {
     confirmButton.addEventListener("click", () => {
       if (!state.dateKey || !state.time) return;
-
+      openCheckout();
       confirmButton.classList.add("is-confirmed");
       setTimeout(() => {
         confirmButton.classList.remove("is-confirmed");
-      }, 1400);
+        }, 900);
+    });
+  }
+
+  if (checkoutBackButton) {
+    checkoutBackButton.addEventListener("click", () => {
+      closeCheckout();
+      confirmButton?.focus();
+    
     });
   }
 
