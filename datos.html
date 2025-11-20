@@ -41,7 +41,8 @@
         <section class="checkout-form" aria-label="Datos del paciente">
           <label class="checkout-form__field">
             <span>RUT del paciente</span>
-            <input type="text" name="rut" placeholder="12.345.678-9" />
+            <input type="text" name="rut" placeholder="12.345.678-9" data-patient-rut />
+            <span class="checkout-form__error" data-rut-error aria-live="polite"></span>
           </label>
           <label class="checkout-form__field">
             <span>Nombre y Apellido</span>
@@ -51,16 +52,25 @@
             <span>Correo electrónico</span>
             <input type="email" name="email" placeholder="nombre@correo.com" />
           </label>
-          <label class="checkout-form__field">
+          <div class="checkout-form__field"></div>
             <span>Número celular</span>
-            <input type="tel" name="phone" placeholder="+56 9 1234 5678" />
-          </label>
+            <div class="phone-input" data-phone-wrapper>
+              <span class="phone-input__prefix" aria-hidden="true">+56 9</span>
+              <input type="tel" name="phone" placeholder="12345678" inputmode="numeric" pattern="[0-9]*" data-patient-phone />
+              <button class="checkout-form__verify checkout-form__verify--ghost" type="button" data-send-code>
+                Enviar código
+              </button>
+            </div>
+            <span class="checkout-form__error" data-phone-error aria-live="polite"></span>
+            <p class="checkout-form__helper" data-send-feedback aria-live="polite"></p>
+          </div>
           <div class="checkout-form__verification">
             <label class="checkout-form__field">
               <span>Código verificador</span>
-              <input type="text" name="code" placeholder="123456" />
+              <input type="text" name="code" placeholder="123456" inputmode="numeric" pattern="[0-9]*" data-patient-code />
+              <span class="checkout-form__error" data-code-error aria-live="polite"></span>
             </label>
-            <button class="checkout-form__verify" type="button">Confirmar código</button>
+            <button class="checkout-form__verify" type="button" data-confirm-code disabled>Confirmar código</button>
           </div>
         </section>
 

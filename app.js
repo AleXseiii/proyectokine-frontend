@@ -528,6 +528,49 @@ function initSchedulePage() {
     return [...slots];
   }
 
+  function findFirstAvailableDateKey() {
+    for (let offset = 0; offset < 7; offset += 1) {
+      const currentDate = addDays(state.weekStart, offset);
+      const dateKey = formatDateKey(currentDate);
+      if (currentDate.getTime() < state.todayStart.getTime()) continue;
+
+      const rawSlots = state.availability[dateKey]?.[state.professionalId] ?? [];
+      const visibleSlots = getVisibleSlots(dateKey, rawSlots);
+      if (visibleSlots.length) {
+        return dateKey;
+      }
+    }
+
+    return null;
+  }
+
+  function ensureDateSelection() {
+    const weekStartTime = state.weekStart.getTime();
+    const weekEndTime = addDays(state.weekStart, 6).getTime();
+    const currentDate = state.dateKey ? parseDateKey(state.dateKey) : null;
+    const currentTime = currentDate?.getTime() ?? 0;
+
+    const isCurrentInRange =
+      currentDate &&
+      currentTime >= state.todayStart.getTime() &&
+      currentTime >= weekStartTime &&
+      currentTime <= weekEndTime;
+
+    if (isCurrentInRange) return;
+
+    const nextAvailable = findFirstAvailableDateKey();
+    if (nextAvailable) {
+      state.dateKey = nextAvailable;
+      state.time = null;
+      return;
+    }
+
+    const todayInWeek =
+      state.todayStart.getTime() >= weekStartTime && state.todayStart.getTime() <= weekEndTime;
+    state.dateKey = todayInWeek ? state.todayKey : formatDateKey(state.weekStart);
+    state.time = null;
+  }
+
   function updateWeekNavState() {
     if (prevButton) {
       const atMinimum = state.weekStart.getTime() <= state.minWeekStart.getTime();
@@ -675,8 +718,22 @@ function initSchedulePage() {
     });
   }
 
+  function selectDay(dateKey) {
+    if (!dateKey) return;
+    const date = parseDateKey(dateKey);
+    if (!date || date.getTime() < state.todayStart.getTime()) return;
+
+    state.dateKey = dateKey;
+    state.time = null;
+    setSlotsPanelState(true);
+    renderWeek();
+    renderSlots();
+    updateSelection();
+  }
+
   function renderWeek() {
     state.availability = getWeekAvailability(state.weekStart);
+    ensureDateSelection();
     if (weekLabel) {
       weekLabel.textContent = formatWeekLabel(state.weekStart);
     }
@@ -764,13 +821,13 @@ function initSchedulePage() {
         button.title = "Ver horarios disponibles";
       }
 
-      button.addEventListener("click", () => {
-        state.dateKey = dateKey;
-        state.time = null;
-        setSlotsPanelState(true);
-        renderWeek();
-        renderSlots();
-        updateSelection();
+       button.addEventListener("click", () => selectDay(dateKey));
+      button.addEventListener("keydown", (event) => {
+        const isActivationKey = event.key === "Enter" || event.key === " " || event.key === "Spacebar";
+        if (!isActivationKey) return;
+        event.preventDefault();
+        selectDay(dateKey);
+
       });
 
       weekContainer.appendChild(button);
@@ -1024,6 +1081,225 @@ function initPatientDataPage() {
     if (duration) backParams.set("duration", duration);
     if (price) backParams.set("price", price);
     backLink.href = `./horarios.html?${backParams.toString()}`;
+  }
+
+  const rutInput = root.querySelector("[data-patient-rut]");
+  const rutError = root.querySelector("[data-rut-error]");
+  const phoneInput = root.querySelector("[data-patient-phone]");
+  const phoneError = root.querySelector("[data-phone-error]");
+  const sendButton = root.querySelector("[data-send-code]");
+  const sendFeedback = root.querySelector("[data-send-feedback]");
+  const codeInput = root.querySelector("[data-patient-code]");
+  const codeError = root.querySelector("[data-code-error]");
+  const confirmCodeButton = root.querySelector("[data-confirm-code]");
+
+  const verificationState = {
+    sending: false,
+    verifying: false,
+    codeSent: false,
+    codeValidated: false,
+    phoneDigits: "",
+    lastSentPhone: ""
+  };
+
+  const clampDigits = (value = "", maxLength = 0) => value.replace(/\D/g, "").slice(0, maxLength || undefined);
+
+  const formatRutValue = (digits) => {
+    if (!digits) return "";
+    const clean = clampDigits(digits, 9);
+    const body = clean.slice(0, -1);
+    const verifier = clean.slice(-1);
+
+    if (!body) return verifier;
+
+    const reversed = body.split("").reverse();
+    const groups = [];
+    for (let i = 0; i < reversed.length; i += 3) {
+      groups.push(reversed.slice(i, i + 3).reverse().join(""));
+    }
+
+    return `${groups.reverse().join(".")}-${verifier}`;
+  };
+
+  const calculateVerifierDigit = (body) => {
+    let sum = 0;
+    let multiplier = 2;
+
+    for (let i = body.length - 1; i >= 0; i -= 1) {
+      sum += Number.parseInt(body[i], 10) * multiplier;
+      multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+
+    const remainder = 11 - (sum % 11);
+    if (remainder === 11) return "0";
+    if (remainder === 10) return "k";
+    return String(remainder);
+  };
+
+  const validateRut = (digits) => {
+    const clean = clampDigits(digits, 9);
+    if (clean.length < 7) return { valid: false, message: "Ingresa un RUT válido." };
+
+    const body = clean.slice(0, -1);
+    const verifier = clean.slice(-1);
+    const expectedVerifier = calculateVerifierDigit(body);
+    const isValid = verifier === expectedVerifier;
+    return {
+      valid: isValid,
+      message: isValid ? "" : "El dígito verificador no es correcto."
+    };
+  };
+
+  if (rutInput) {
+    rutInput.addEventListener("input", () => {
+      const selectionStart = rutInput.selectionStart || 0;
+      const cleanValue = clampDigits(rutInput.value, 9);
+      const digitsBeforeCaret = clampDigits(rutInput.value.slice(0, selectionStart), 9);
+
+      rutInput.value = formatRutValue(cleanValue);
+
+      const nextCaretDigits = digitsBeforeCaret.length;
+      let caretIndex = rutInput.value.length;
+      let digitCount = 0;
+      for (let i = 0; i < rutInput.value.length; i += 1) {
+        if (/\d/.test(rutInput.value[i])) {
+          digitCount += 1;
+        }
+        if (digitCount >= nextCaretDigits) {
+          caretIndex = i + 1;
+          break;
+        }
+      }
+      rutInput.setSelectionRange(caretIndex, caretIndex);
+
+      if (rutError) {
+        const result = validateRut(cleanValue);
+        rutError.textContent = result.valid ? "" : result.message;
+      }
+    });
+  }
+
+  const maskPhone = (digits) => {
+    if (!digits) return "";
+    const left = digits.slice(0, 4);
+    const right = digits.slice(4);
+    return `${left} ${right}`.trim();
+  };
+
+  const updateConfirmButtonState = () => {
+    if (!confirmCodeButton) return;
+    const code = clampDigits(codeInput?.value ?? "", 6);
+    const canConfirm = verificationState.codeSent && code.length === 6;
+    confirmCodeButton.disabled = !canConfirm || verificationState.verifying;
+  };
+
+  const updatePhoneState = () => {
+    if (!phoneInput) return;
+    const digits = clampDigits(phoneInput.value, 8);
+    phoneInput.value = digits;
+    verificationState.phoneDigits = digits;
+    if (phoneError) {
+      phoneError.textContent = digits.length === 8 ? "" : "Completa los 8 dígitos del celular.";
+    }
+    updateConfirmButtonState();
+  };
+
+  const sendVerificationCode = async () => {
+    if (!sendButton) return;
+    const digits = verificationState.phoneDigits;
+    if (digits.length < 8) {
+      if (phoneError) phoneError.textContent = "Completa los 8 dígitos del celular.";
+      return;
+    }
+
+    verificationState.sending = true;
+    sendButton.disabled = true;
+    if (sendFeedback) {
+      sendFeedback.textContent = "Enviando código...";
+    }
+
+    try {
+      // TODO: conectar con backend real para enviar SMS
+      // await fetch("/api/enviar-codigo", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ phone: `+569${digits}` })
+      // });
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      verificationState.codeSent = true;
+      verificationState.lastSentPhone = digits;
+      if (sendFeedback) {
+        sendFeedback.textContent = `Código enviado al +56 9 ${maskPhone(digits)}`;
+      }
+      if (codeError) codeError.textContent = "";
+      updateConfirmButtonState();
+    } catch (error) {
+      if (sendFeedback) {
+        sendFeedback.textContent = "No se pudo enviar el código. Inténtalo nuevamente.";
+      }
+    } finally {
+      verificationState.sending = false;
+      sendButton.disabled = false;
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!codeInput) return;
+    const code = clampDigits(codeInput.value, 6);
+    if (code.length < 6) {
+      if (codeError) codeError.textContent = "El código debe tener 6 dígitos.";
+      return;
+    }
+    if (!verificationState.codeSent) {
+      if (codeError) codeError.textContent = "Primero envía el código a tu celular.";
+      return;
+    }
+
+    verificationState.verifying = true;
+    updateConfirmButtonState();
+    if (codeError) codeError.textContent = "";
+
+    try {
+      // TODO: conectar con backend real para verificar el SMS
+      // const response = await fetch("/api/verificar-codigo", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ phone: `+569${verificationState.phoneDigits}`, code })
+      // });
+      // const result = await response.json();
+      // const isValid = Boolean(result?.valid);
+      const isValid = true;
+      verificationState.codeValidated = isValid;
+      if (codeError) {
+        codeError.textContent = isValid ? "Código confirmado." : "El código no es correcto.";
+      }
+    } catch (error) {
+      if (codeError) codeError.textContent = "No pudimos validar el código. Intenta nuevamente.";
+    } finally {
+      verificationState.verifying = false;
+      updateConfirmButtonState();
+    }
+  };
+
+  if (phoneInput) {
+    phoneInput.addEventListener("input", updatePhoneState);
+  }
+
+  if (sendButton) {
+    sendButton.addEventListener("click", sendVerificationCode);
+  }
+
+  if (codeInput) {
+    codeInput.addEventListener("input", () => {
+      codeInput.value = clampDigits(codeInput.value, 6);
+      if (codeError) codeError.textContent = "";
+      updateConfirmButtonState();
+    });
+  }
+
+  if (confirmCodeButton) {
+    confirmCodeButton.addEventListener("click", verifyCode);
   }
 }
 
