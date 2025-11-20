@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de salud y Bienestar - Datos del paciente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./home.css" />
+</head>
+<body data-page="datos">
+  <div class="layout">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand__logo"></div>
+        <div class="brand__text">
+          <span>Centro de salud y</span>
+          <span class="brand__text--bold">Bienestar</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a data-nav-target="home" href="./home.html#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="seguimiento" href="#">Seguimiento</a>
+      </nav>
+    </header>
+
+    <main class="schedule-checkout patient-data">
+      <div class="schedule-checkout__header">
+        <a class="schedule-checkout__back" href="./horarios.html" data-patient-back>&lt; Volver</a>
+        <div>
+          <span class="schedule__subtitle">Completa los datos del paciente</span>
+          <h1>Confirmar reserva</h1>
+        </div>
+      </div>
+
+      <div class="schedule-checkout__grid">
+        <section class="checkout-form" aria-label="Datos del paciente">
+          <label class="checkout-form__field">
+            <span>RUT del paciente</span>
+            <input type="text" name="rut" placeholder="12.345.678-9" />
+          </label>
+          <label class="checkout-form__field">
+            <span>Nombre y Apellido</span>
+            <input type="text" name="name" placeholder="Nombre completo" />
+          </label>
+          <label class="checkout-form__field">
+            <span>Correo electrónico</span>
+            <input type="email" name="email" placeholder="nombre@correo.com" />
+          </label>
+          <label class="checkout-form__field">
+            <span>Número celular</span>
+            <input type="tel" name="phone" placeholder="+56 9 1234 5678" />
+          </label>
+          <div class="checkout-form__verification">
+            <label class="checkout-form__field">
+              <span>Código verificador</span>
+              <input type="text" name="code" placeholder="123456" />
+            </label>
+            <button class="checkout-form__verify" type="button">Confirmar código</button>
+          </div>
+        </section>
+
+        <aside class="checkout-summary" aria-label="Resumen de la hora">
+          <header class="checkout-summary__profile">
+            <div class="schedule-profile">
+              <div class="schedule-profile__photo schedule-profile__photo--lissette" data-patient-photo aria-hidden="true"></div>
+              <div class="schedule-profile__info">
+                <span class="schedule-profile__role" data-patient-role></span>
+                <h2 data-patient-name></h2>
+              </div>
+            </div>
+          </header>
+
+          <div class="checkout-summary__service">
+            <h3 data-patient-service>Sesión de kinesiología</h3>
+            <p>
+              <strong>Modalidad:</strong> <span data-patient-modality>Presencial</span><br />
+              <strong>Duración:</strong> <span data-patient-duration>45 minutos</span><br />
+              <strong>Precio:</strong> <span data-patient-price>$35.000 CLP</span>
+            </p>
+          </div>
+
+          <div class="checkout-summary__selection">
+            <span>Hora seleccionada</span>
+            <strong data-patient-selection>Ninguna hora seleccionada</strong>
+          </div>
+
+          <div class="checkout-summary__notes">
+            <p class="checkout-summary__warning">
+              Importante: al agendar aceptas las políticas de cancelación y asistencia con 48 horas de anticipación.
+            </p>
+            <p class="checkout-summary__warning">
+              Si no dispones de seguro Isapre podríamos derivarte a modalidad particular, mantenimiento o teleconsulta.
+            </p>
+          </div>
+
+          <button class="schedule-summary__action" type="button">Confirmar hora</button>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

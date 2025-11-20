@@ -141,12 +141,6 @@ const scheduleProfessionalMap = scheduleProfessionals.reduce((acc, professional)
   return acc;
 }, {});
 
-// Ajusta el porcentaje de días que se bloquean dinámicamente cuando no hay información explícita.
-// Usa valores entre 0 y 1. Ejemplo: 0.25 equivale a un 25% de días bloqueados.
-const RANDOM_BLOCK_RATE = 0;
-// Ajusta el rango de variación del porcentaje anterior por cada profesional y semana.
-const RANDOM_BLOCK_VARIANCE = 0.05;
-
 // Define los tiempos de animación principales del carrusel y los desplegables.
 const SLIDE_DURATION = 240; // ms
 const ACCORDION_DURATION = 200; // ms
@@ -258,43 +252,6 @@ const scheduleAvailabilityOverrides = {
 
 const weekAvailabilityCache = new Map();
 
-function seededRandom(seed) {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) | 0;
-  }
-  const result = Math.abs(Math.sin(hash) * 10000);
-  return result - Math.floor(result);
-}
-
-function getDynamicBlockRate(weekStart, professionalId) {
-  const weekKey = formatDateKey(weekStart);
-  const variation = (seededRandom(`${professionalId}:${weekKey}`) * 2 - 1) * RANDOM_BLOCK_VARIANCE;
-  const rate = RANDOM_BLOCK_RATE + variation;
-  return Math.min(1, Math.max(0, rate));
-}
-
-function shouldBlockByAssumption(weekStart, dateKey, professionalId) {
-  const threshold = getDynamicBlockRate(weekStart, professionalId);
-  return seededRandom(`${professionalId}:${dateKey}`) < threshold;
-}
-
-function applyDynamicAvailability(availability, weekStart) {
-  Object.entries(availability).forEach(([dateKey, dayAvailability]) => {
-    scheduleProfessionals.forEach((professional) => {
-      const override = scheduleAvailabilityOverrides[dateKey]?.[professional.id];
-      if (override !== undefined) return;
-
-      const slots = dayAvailability[professional.id];
-      if (!Array.isArray(slots) || !slots.length) return;
-
-      if (shouldBlockByAssumption(weekStart, dateKey, professional.id)) {
-        dayAvailability[professional.id] = [];
-      }
-    });
-  });
-}
-
 function formatDateKey(date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -358,8 +315,6 @@ function getWeekAvailability(weekStart) {
       });
     }
   }
-
-  applyDynamicAvailability(availability, weekStart);
 
   weekAvailabilityCache.set(cacheKey, availability);
   return availability;
@@ -460,16 +415,6 @@ function initSchedulePage() {
   const priceElement = scheduleRoot.querySelector("[data-schedule-price]");
   const serviceElement = scheduleRoot.querySelector("[data-schedule-service]");
   const selectionContainer = scheduleRoot.querySelector("[data-schedule-selection]");
-  const checkoutSection = scheduleRoot.querySelector("[data-schedule-checkout]");
-  const checkoutSelectionLabel = scheduleRoot.querySelector("[data-checkout-selection]");
-  const checkoutService = scheduleRoot.querySelector("[data-checkout-service]");
-  const checkoutModality = scheduleRoot.querySelector("[data-checkout-modality]");
-  const checkoutDuration = scheduleRoot.querySelector("[data-checkout-duration]");
-  const checkoutPrice = scheduleRoot.querySelector("[data-checkout-price]");
-  const checkoutProfessionalName = scheduleRoot.querySelector("[data-checkout-name]");
-  const checkoutProfessionalRole = scheduleRoot.querySelector("[data-checkout-role]");
-  const checkoutBackButton = scheduleRoot.querySelector("[data-checkout-back]");
-  const checkoutPhoto = scheduleRoot.querySelector("[data-checkout-photo]");
   const prevButton = scheduleRoot.querySelector("[data-schedule-prev]");
   const nextButton = scheduleRoot.querySelector("[data-schedule-next]");
   const emptyMessage = scheduleRoot.querySelector("[data-schedule-empty]");
@@ -688,61 +633,11 @@ function initSchedulePage() {
       );
     }
 
-    updateCheckoutSummary();
-
-    if (!state.dateKey || !state.time) {
-      closeCheckout();
-    }
-
     if (confirmButton) {
       const isReady = Boolean(state.dateKey && state.time);
       confirmButton.disabled = !isReady;
       confirmButton.setAttribute("aria-disabled", isReady ? "false" : "true");
     }
-  }
-
-  function updateCheckoutSummary() {
-    if (!checkoutSection) return;
-
-    const professional = scheduleProfessionalMap[state.professionalId];
-    if (checkoutProfessionalName) {
-      checkoutProfessionalName.textContent = professional?.name ?? "";
-    }
-    if (checkoutProfessionalRole) {
-      checkoutProfessionalRole.textContent = professional?.role ?? "";
-    }
-    if (checkoutService) {
-      checkoutService.textContent = state.session?.title || professional?.service || "";
-    }
-    if (checkoutModality) {
-      checkoutModality.textContent = state.session?.modality || professional?.modality || "";
-    }
-    if (checkoutDuration) {
-      checkoutDuration.textContent = state.session?.duration || professional?.duration || "";
-    }
-    if (checkoutPrice) {
-      checkoutPrice.textContent = state.session?.price || professional?.price || "";
-    }
-    if (checkoutSelectionLabel) {
-      checkoutSelectionLabel.textContent = formatSelectionLabel(state.dateKey, state.time);
-    }
-    if (checkoutPhoto && professional?.photoClass) {
-      scheduleProfessionals.forEach((item) => checkoutPhoto.classList.remove(item.photoClass));
-      checkoutPhoto.classList.add(professional.photoClass);
-    }
-  }
-  function openCheckout() {
-    if (!checkoutSection || !state.dateKey || !state.time) return;
-    checkoutSection.hidden = false;
-    scheduleRoot.classList.add("schedule--checkout");
-    updateCheckoutSummary();
-    checkoutSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function closeCheckout() {
-    if (!checkoutSection) return;
-    checkoutSection.hidden = true;
-    scheduleRoot.classList.remove("schedule--checkout");
   }
 
   function setSlotsPanelState(isOpen) {
@@ -942,18 +837,20 @@ function initSchedulePage() {
   if (confirmButton) {
     confirmButton.addEventListener("click", () => {
       if (!state.dateKey || !state.time) return;
-      openCheckout();
-      confirmButton.classList.add("is-confirmed");
-      setTimeout(() => {
-        confirmButton.classList.remove("is-confirmed");
-        }, 900);
-    });
-  }
 
-  if (checkoutBackButton) {
-    checkoutBackButton.addEventListener("click", () => {
-      closeCheckout();
-      confirmButton?.focus();
+      const professional = scheduleProfessionalMap[state.professionalId];
+      const params = new URLSearchParams({
+        professional: state.professionalId,
+        date: state.dateKey,
+        time: state.time
+      });
+
+      if (state.session?.title) params.set("service", state.session.title);
+      if (state.session?.duration) params.set("duration", state.session.duration);
+      if (state.session?.price) params.set("price", state.session.price);
+      if (professional?.modality) params.set("modality", professional.modality);
+
+      window.location.href = `./datos.html?${params.toString()}`;
     
     });
   }
@@ -1063,6 +960,58 @@ function initSchedulePage() {
   updateSelection();
   updateWeekNavState();
 }
+
+function initPatientDataPage() {
+  const root = document.querySelector(".patient-data");
+  if (!root) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const professionalId = params.get("professional") ?? "";
+  const professional = scheduleProfessionalMap[professionalId];
+
+  const photo = root.querySelector("[data-patient-photo]");
+  const nameElement = root.querySelector("[data-patient-name]");
+  const roleElement = root.querySelector("[data-patient-role]");
+  const serviceElement = root.querySelector("[data-patient-service]");
+  const modalityElement = root.querySelector("[data-patient-modality]");
+  const durationElement = root.querySelector("[data-patient-duration]");
+  const priceElement = root.querySelector("[data-patient-price]");
+  const selectionElement = root.querySelector("[data-patient-selection]");
+  const backLink = root.querySelector("[data-patient-back]");
+
+  const service = params.get("service") ?? professional?.service ?? "";
+  const modality = params.get("modality") ?? professional?.modality ?? "";
+  const duration = params.get("duration") ?? professional?.duration ?? "";
+  const price = params.get("price") ?? professional?.price ?? "";
+  const dateKey = params.get("date");
+  const time = params.get("time");
+
+  if (nameElement) nameElement.textContent = professional?.name ?? "";
+  if (roleElement) roleElement.textContent = professional?.role ?? "";
+  if (serviceElement) serviceElement.textContent = service;
+  if (modalityElement) modalityElement.textContent = modality;
+  if (durationElement) durationElement.textContent = duration;
+  if (priceElement) priceElement.textContent = price;
+
+  if (selectionElement) {
+    selectionElement.textContent = formatSelectionLabel(dateKey, time);
+  }
+
+  if (photo && professional?.photoClass) {
+    scheduleProfessionals.forEach((item) => photo.classList.remove(item.photoClass));
+    photo.classList.add(professional.photoClass);
+  }
+
+  if (backLink) {
+    const backParams = new URLSearchParams();
+    if (professionalId) backParams.set("professional", professionalId);
+    if (service) backParams.set("service", service);
+    if (duration) backParams.set("duration", duration);
+    if (price) backParams.set("price", price);
+    backLink.href = `./horarios.html?${backParams.toString()}`;
+  }
+}
+
 function getCurrentPage() {
   const { page } = document.body?.dataset ?? {};
   return page ?? "";
@@ -1070,7 +1019,7 @@ function getCurrentPage() {
 
 function initNavigationHighlight() {
   const currentPage = getCurrentPage();
-  const highlightPage = currentPage === "horarios" ? "agendar" : currentPage;
+  const highlightPage = ["horarios", "datos"].includes(currentPage) ? "agendar" : currentPage;
   const navLinks = document.querySelectorAll(".site-nav [data-nav-target]");
 
   navLinks.forEach((link) => {
@@ -1335,7 +1284,8 @@ const pageInitializers = {
   valores: initValuesPage,
   quienes: initAboutPage,
   agendar: initBookingPage,
-  horarios: initSchedulePage
+  horarios: initSchedulePage,
+  datos: initPatientDataPage
 };
 
 window.addEventListener("DOMContentLoaded", () => {
