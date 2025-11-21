@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de salud y Bienestar - Confirmación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./home.css" />
+</head>
+<body data-page="confirmacion">
+  <div class="layout">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand__logo"></div>
+        <div class="brand__text">
+          <span>Centro de salud y</span>
+          <span class="brand__text--bold">Bienestar</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a data-nav-target="home" href="./home.html#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="seguimiento" href="./agendar.html#seguimiento">Seguimiento</a>
+      </nav>
+    </header>
+
+    <main class="appointment-confirmation">
+      <section class="confirmation-card">
+        <div class="confirmation-card__icon" aria-hidden="true">✔️</div>
+        <h1>¡Tu cita ha sido agendada con éxito!</h1>
+        <p class="confirmation-card__lead">
+          Hemos registrado tu cita en el Centro de Kinesiología Salud y Bienestar. Recibirás un mensaje de
+          confirmación en el correo registrado.
+        </p>
+
+        <article class="confirmation-summary" aria-label="Resumen de la cita">
+          <h2>Resumen de tu cita</h2>
+          <ul>
+            <li><strong>Fecha:</strong> <span data-confirmation-date>—</span></li>
+            <li><strong>Hora:</strong> <span data-confirmation-time>—</span></li>
+            <li><strong>Kinesiólogo:</strong> <span data-confirmation-professional>—</span></li>
+            <li><strong>Sede:</strong> <span data-confirmation-venue>Sede Chillán</span></li>
+            <li><strong>Modalidad:</strong> <span data-confirmation-modality>—</span></li>
+          </ul>
+          <!-- Aquí se arma el objeto de datos de la cita antes de enviarlo al backend para email. -->
+        </article>
+
+        <div class="confirmation-card__actions">
+          <a class="button" href="./home.html">Volver al inicio</a>
+          <a class="button button--ghost" href="./agendar.html#seguimiento">Seguimiento</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

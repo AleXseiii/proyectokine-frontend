@@ -31,38 +31,41 @@
     <main class="schedule-checkout patient-data">
       <div class="schedule-checkout__header">
         <a class="schedule-checkout__back" href="./horarios.html" data-patient-back>&lt; Volver</a>
-        <div>
+        <div class="schedule-checkout__titles">
           <span class="schedule__subtitle">Completa los datos del paciente</span>
           <h1>Confirmar reserva</h1>
         </div>
       </div>
-       <div class="schedule-checkout__grid">
-          <section class="checkout-form" aria-label="Datos del paciente">
-            <label class="checkout-form__field">
-              <span>RUT del paciente</span>
-              <input type="text" name="rut" placeholder="12.345.678-9" data-patient-rut />
-              <span class="checkout-form__error" data-rut-error aria-live="polite"></span>
-            </label>
-            <label class="checkout-form__field">
-              <span>Nombre y Apellido</span>
-              <input type="text" name="name" placeholder="Nombre completo" />
-            </label>
-            <label class="checkout-form__field">
-              <span>Correo electrónico</span>
-              <input type="email" name="email" placeholder="nombre@correo.com" />
-            </label>
-            <div class="checkout-form__field">
-              <span>Número celular</span>
-              <div class="phone-input" data-phone-wrapper>
-                <label class="phone-input__country">
-                  <span class="phone-input__country-label">País</span>
-                  <select data-phone-country aria-label="Seleccionar país">
-                    <option value="CL">🇨🇱 Chile (+56)</option>
-                    <option value="AR">🇦🇷 Argentina (+54)</option>
-                  </select>
-                  <!-- Ajusta la lista de países y sus prefijos modificando estas opciones. -->
-                </label>
-                <span class="phone-input__prefix" data-phone-prefix aria-hidden="true">+56</span>
+      <div class="schedule-checkout__grid">
+        <section class="checkout-form" aria-label="Datos del paciente">
+          <label class="checkout-form__field">
+            <span>RUT del paciente</span>
+            <input type="text" name="rut" placeholder="12.345.678-9" data-patient-rut />
+            <span class="checkout-form__error" data-rut-error aria-live="polite"></span>
+          </label>
+          <label class="checkout-form__field">
+            <span>Nombre y Apellido</span>
+            <input type="text" name="name" placeholder="Nombre completo" data-patient-fullname />
+            <span class="checkout-form__error" data-name-error aria-live="polite"></span>
+          </label>
+          <label class="checkout-form__field">
+            <span>Correo electrónico</span>
+            <input type="email" name="email" placeholder="nombre@correo.com" data-patient-email />
+            <span class="checkout-form__error" data-email-error aria-live="polite"></span>
+          </label>
+          <div class="checkout-form__field checkout-form__field--phone">
+            <span>Número celular</span>
+            <div class="phone-input" data-phone-wrapper>
+              <label class="phone-input__country" aria-label="Seleccionar país">
+                <select data-phone-country>
+                  <option value="CL">🇨🇱 Chile (+56)</option>
+                  <option value="AR">🇦🇷 Argentina (+54)</option>
+                  <!-- Ajusta la lista de países/códigos en app.js para habilitar más opciones. -->
+                </select>
+                <!-- El país por defecto se fija en app.js y puedes cambiarlo aquí o en el script. -->
+              </label>
+              <div class="phone-input__number">
+                <span class="phone-input__dial" data-phone-dial>+56</span>
                 <input
                   type="tel"
                   name="phone"
@@ -71,17 +74,24 @@
                   pattern="[0-9]*"
                   data-patient-phone
                 />
-                <button class="checkout-form__verify checkout-form__verify--ghost" type="button" data-send-code>
-                  Enviar código
-                </button>
               </div>
-              <span class="checkout-form__error" data-phone-error aria-live="polite"></span>
-              <p class="checkout-form__helper" data-send-feedback aria-live="polite"></p>
+              <button class="checkout-form__verify checkout-form__verify--ghost" type="button" data-send-code>
+                Enviar código
+              </button>
             </div>
+             <span class="checkout-form__error" data-phone-error aria-live="polite"></span>
+            <p class="checkout-form__helper" data-send-feedback aria-live="polite"></p>
+          </div>
           <div class="checkout-form__verification">
-            <label class="checkout-form__field">
+             <label class="checkout-form__field checkout-form__field--code">
               <span>Código verificador</span>
-              <input type="text" name="code" placeholder="123456" inputmode="numeric" pattern="[0-9]*" data-patient-code />
+                <input
+                    type="text"
+                    name="code"
+                    placeholder="123456"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    data-patient-code
               <span class="checkout-form__error" data-code-error aria-live="polite"></span>
             </label>
             <button class="checkout-form__verify" type="button" data-confirm-code disabled>Confirmar código</button>
@@ -120,13 +130,11 @@
               Si no dispones de seguro Isapre podríamos derivarte a modalidad particular, mantenimiento o teleconsulta.
             </p>
           </div>
-
-          <button class="schedule-summary__action" type="button">Confirmar hora</button>
+        <button class="schedule-summary__action" type="button" data-patient-submit disabled>Confirmar hora</button>
         </aside>
       </div>
     </main>
   </div>
-
   <script src="./app.js" defer></script>
 </body>
 </html>

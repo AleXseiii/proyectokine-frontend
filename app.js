@@ -476,7 +476,9 @@ function initSchedulePage() {
     weekStart: getWeekStart(now),
     minWeekStart: getWeekStart(now),
     professionalId: initialProfessional,
-    dateKey: todayKey,
+     // No se marca ningún día por defecto: el paciente debe hacer clic en la tarjeta del día.
+    // Cambia este valor si en el futuro quieres preseleccionar (p.ej. siempre el lunes actual).
+    dateKey: null,
     time: null,
     availability: {},
     session: hasSessionInfo ? initialSession : null,
@@ -485,9 +487,8 @@ function initSchedulePage() {
     transitionDirection: 0,
     motionDisabled: reduceMotionQuery.matches
   };
-    // Punto único para alterar el cálculo de la semana inicial y el “día por defecto”.
-  // Si necesitas mostrar otra semana o preseleccionar un día distinto (p.ej. siempre lunes),
-  // ajusta weekStart/dateKey aquí antes de llamar a la función de arranque.
+     // Punto único para alterar el cálculo de la semana inicial y el “día por defecto”.
+  // Si necesitas mostrar otra semana o reactivar un día auto-seleccionado, ajusta weekStart/dateKey aquí.
   const handleMotionPreferenceChange = (event) => {
     state.motionDisabled = event.matches;
     scheduleRoot.classList.toggle("schedule--reduce-motion", state.motionDisabled);
@@ -528,49 +529,6 @@ function initSchedulePage() {
     }
 
     return [...slots];
-  }
-
-  function findFirstAvailableDateKey() {
-    for (let offset = 0; offset < 7; offset += 1) {
-      const currentDate = addDays(state.weekStart, offset);
-      const dateKey = formatDateKey(currentDate);
-      if (currentDate.getTime() < state.todayStart.getTime()) continue;
-
-      const rawSlots = state.availability[dateKey]?.[state.professionalId] ?? [];
-      const visibleSlots = getVisibleSlots(dateKey, rawSlots);
-      if (visibleSlots.length) {
-        return dateKey;
-      }
-    }
-
-    return null;
-  }
-
-  function ensureDateSelection() {
-    const weekStartTime = state.weekStart.getTime();
-    const weekEndTime = addDays(state.weekStart, 6).getTime();
-    const currentDate = state.dateKey ? parseDateKey(state.dateKey) : null;
-    const currentTime = currentDate?.getTime() ?? 0;
-
-    const isCurrentInRange =
-      currentDate &&
-      currentTime >= state.todayStart.getTime() &&
-      currentTime >= weekStartTime &&
-      currentTime <= weekEndTime;
-
-    if (isCurrentInRange) return;
-
-    const nextAvailable = findFirstAvailableDateKey();
-    if (nextAvailable) {
-      state.dateKey = nextAvailable;
-      state.time = null;
-      return;
-    }
-
-    const todayInWeek =
-      state.todayStart.getTime() >= weekStartTime && state.todayStart.getTime() <= weekEndTime;
-    state.dateKey = todayInWeek ? state.todayKey : formatDateKey(state.weekStart);
-    state.time = null;
   }
 
   function updateWeekNavState() {
@@ -735,7 +693,6 @@ function initSchedulePage() {
 
   function renderWeek() {
     state.availability = getWeekAvailability(state.weekStart);
-    ensureDateSelection();
     if (weekLabel) {
       weekLabel.textContent = formatWeekLabel(state.weekStart);
     }
@@ -758,7 +715,9 @@ function initSchedulePage() {
       button.type = "button";
       button.className = "schedule-day";
       button.dataset.dateKey = dateKey;
-
+// Bloquea navegación por teclado; el día se activa solo con clic de mouse.
+      // Elimina el tabindex negativo si necesitas reactivar foco/Enter/Espacio en el futuro.
+      button.tabIndex = -1;
       const name = document.createElement("span");
       name.className = "schedule-day__name";
       name.textContent = capitalize(weekdayLabel);
@@ -823,8 +782,8 @@ function initSchedulePage() {
         button.title = "Ver horarios disponibles";
       }
 
-      // Maneja la selección solo con click para evitar conflictos con activaciones por teclado.
-      // Si más adelante quieres reactivar navegación por Enter/Space, agrega aquí el listener de teclado.
+      // Maneja la selección solo con click para evitar activaciones por teclado.
+      // Si más adelante quieres reactivar navegación por Enter/Espacio, agrega aquí el listener de teclado.
       button.addEventListener("click", () => selectDay(dateKey));
 
       weekContainer.appendChild(button);
@@ -878,6 +837,9 @@ function initSchedulePage() {
         button.type = "button";
         button.className = "schedule-slot";
         button.textContent = slot;
+        // Mantén interacción solo por clic; retira tabIndex si vuelves a habilitar teclado.
+        button.tabIndex = -1; // Este inicializador pinta la semana completa apenas carga la página y fija el día activo por defecto.
+    // Ajusta aquí si quieres variar la lógica del arranque (p.ej. cargar siempre la próxima semana).
         const isSelected = state.time === slot;
         if (isSelected) {
           button.classList.add("is-selected");
@@ -1024,8 +986,9 @@ function initSchedulePage() {
 
 
 const initializeScheduleView = () => {
-    // Este inicializador pinta la semana completa apenas carga la página y fija el día activo por defecto.
-    // Ajusta aquí si quieres variar la lógica del arranque (p.ej. cargar siempre la próxima semana).
+// Este inicializador pinta la semana completa apenas carga la página.
+    // Ajusta aquí si quieres modificar cómo se arma la primera vista del calendario
+    // (p.ej. cargar otra semana o volver a activar un día preseleccionado por defecto).
     updateProfessionalInfo();
     renderWeek();
     renderSlots();
@@ -1053,7 +1016,8 @@ function initPatientDataPage() {
   const priceElement = root.querySelector("[data-patient-price]");
   const selectionElement = root.querySelector("[data-patient-selection]");
   const backLink = root.querySelector("[data-patient-back]");
-
+  const fullNameInput = root.querySelector("[data-patient-fullname]");
+  const emailInput = root.querySelector("[data-patient-email]");
   const service = params.get("service") ?? professional?.service ?? "";
   const modality = params.get("modality") ?? professional?.modality ?? "";
   const duration = params.get("duration") ?? professional?.duration ?? "";
@@ -1088,8 +1052,10 @@ function initPatientDataPage() {
 
   const rutInput = root.querySelector("[data-patient-rut]");
   const rutError = root.querySelector("[data-rut-error]");
+  const nameError = root.querySelector("[data-name-error]");
+  const emailError = root.querySelector("[data-email-error]");
   const countrySelect = root.querySelector("[data-phone-country]");
-  const phonePrefix = root.querySelector("[data-phone-prefix]");
+  const phoneDial = root.querySelector("[data-phone-dial]");
   const phoneInput = root.querySelector("[data-patient-phone]");
   const phoneError = root.querySelector("[data-phone-error]");
   const sendButton = root.querySelector("[data-send-code]");
@@ -1097,6 +1063,7 @@ function initPatientDataPage() {
   const codeInput = root.querySelector("[data-patient-code]");
   const codeError = root.querySelector("[data-code-error]");
   const confirmCodeButton = root.querySelector("[data-confirm-code]");
+  const confirmAppointmentButton = root.querySelector("[data-patient-submit]");
 
   const verificationState = {
     sending: false,
@@ -1106,6 +1073,14 @@ function initPatientDataPage() {
     phoneDigits: "",
     lastSentPhone: "",
     lastDialCode: ""
+  };
+
+  const appointmentState = {
+    rut: "",
+    fullName: "",
+    email: "",
+    code: "",
+    selectionValid: Boolean(dateKey && time)
   };
 
   const phoneCountries = [
@@ -1168,6 +1143,22 @@ function initPatientDataPage() {
     };
   };
 
+  const validateName = (value) => {
+    if (!value) return { valid: false, message: "Ingresa el nombre del paciente." };
+    if (value.trim().length < 4) {
+      return { valid: false, message: "El nombre debe tener al menos 4 caracteres." };
+    }
+    return { valid: true, message: "" };
+  };
+
+  const validateEmail = (value) => {
+    if (!value) return { valid: false, message: "Ingresa un correo electrónico." };
+    const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+    const isValid = emailRegex.test(value.trim());
+    return { valid: isValid, message: isValid ? "" : "Correo inválido." };
+  };
+
+
   if (rutInput) {
     rutInput.addEventListener("input", () => {
       const selectionStart = rutInput.selectionStart || 0;
@@ -1194,12 +1185,32 @@ function initPatientDataPage() {
         const result = validateRut(cleanValue);
         rutError.textContent = result.valid ? "" : result.message;
       }
+      appointmentState.rut = cleanValue;
+      updateSubmitState();
+    });
+  }
+
+  if (fullNameInput) {
+    fullNameInput.addEventListener("input", () => {
+      appointmentState.fullName = fullNameInput.value;
+      const result = validateName(appointmentState.fullName);
+      if (nameError) nameError.textContent = result.valid ? "" : result.message;
+      updateSubmitState();
+    });
+  }
+
+  if (emailInput) {
+    emailInput.addEventListener("input", () => {
+      appointmentState.email = emailInput.value;
+      const result = validateEmail(appointmentState.email);
+      if (emailError) emailError.textContent = result.valid ? "" : result.message;
+      updateSubmitState();
     });
   }
 
   const maskPhone = (digits) => {
     if (!digits) return "";
-   return digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+    return digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
   };
 
   const getExpectedLength = (country) => country.maxLength ?? country.minLength ?? 9;
@@ -1224,16 +1235,29 @@ function initPatientDataPage() {
     confirmCodeButton.disabled = !canConfirm || verificationState.verifying;
   };
 
-  const updatePhonePrefix = () => {
+  const updateSubmitState = () => {
+    if (!confirmAppointmentButton) return;
     const country = getSelectedCountry();
-    if (phonePrefix) {
-      phonePrefix.textContent = `${country.flag} ${country.dialCode}`;
+    const rutValid = validateRut(appointmentState.rut).valid;
+    const nameValid = validateName(appointmentState.fullName).valid;
+    const emailValid = validateEmail(appointmentState.email).valid;
+    const phoneValid = validatePhoneDigits(verificationState.phoneDigits, country).valid;
+    const codeValid = verificationState.codeValidated && appointmentState.code.length === 6;
+    const ready =
+      rutValid && nameValid && emailValid && phoneValid && codeValid && appointmentState.selectionValid;
+    confirmAppointmentButton.disabled = !ready;
+  };
+
+  const updatePhoneDial = () => {
+    const country = getSelectedCountry();
+    if (phoneDial) {
+      phoneDial.textContent = `${country.flag} ${country.dialCode}`;
     }
     if (phoneInput) {
       phoneInput.placeholder = country.example ?? "";
     }
     verificationState.lastDialCode = country.dialCode;
-    // Si quieres bloquear el prefijo, deshabilita el select o elimina el listener de cambio.
+     // Si quieres cambiar el país por defecto, modifica phoneCountries o setea countrySelect.value aquí.
   };
   
   const updatePhoneState = () => {
@@ -1247,6 +1271,7 @@ function initPatientDataPage() {
       phoneError.textContent = result.valid ? "" : result.message;
     }
     updateConfirmButtonState();
+    updateSubmitState();
   };
 
   const sendVerificationCode = async () => {
@@ -1266,13 +1291,12 @@ function initPatientDataPage() {
     }
 
     try {
-      // TODO: conectar con backend real para enviar SMS (Twilio u otro)
-      // await fetch("/api/enviar-codigo", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //body: JSON.stringify({ phone: `${country.dialCode}${digits}` })
-      // });
-      await new Promise((resolve) => setTimeout(resolve, 400));
+     // TODO: conectar con backend real para enviar SMS (Twilio u otro proveedor).
+      await fetch("/api/enviar-codigo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: `${country.dialCode}${digits}` })
+      });
 
       verificationState.codeSent = true;
       verificationState.lastSentPhone = digits;
@@ -1282,6 +1306,7 @@ function initPatientDataPage() {
       }
       if (codeError) codeError.textContent = "";
       updateConfirmButtonState();
+      updateSubmitState();
     } catch (error) {
       if (sendFeedback) {
         sendFeedback.textContent = "No se pudo enviar el código. Inténtalo nuevamente.";
@@ -1309,18 +1334,17 @@ function initPatientDataPage() {
     if (codeError) codeError.textContent = "";
 
     try {
-      // TODO: conectar con backend real para verificar el SMS
-      // const response = await fetch("/api/verificar-codigo", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     phone: `${verificationState.lastDialCode}${verificationState.phoneDigits}`,
-      //     code
-      //   })
-      // });
-      // const result = await response.json();
-      // const isValid = Boolean(result?.valid);
-      const isValid = true;
+      // TODO: conectar con backend real para verificar el SMS.
+      const response = await fetch("/api/verificar-codigo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: `${verificationState.lastDialCode}${verificationState.phoneDigits}`,
+          code
+        })
+      });
+      const result = await response.json();
+      const isValid = Boolean(result?.valid);
       verificationState.codeValidated = isValid;
       if (codeError) {
         codeError.textContent = isValid ? "Código confirmado." : "El código no es correcto.";
@@ -1330,6 +1354,7 @@ function initPatientDataPage() {
     } finally {
       verificationState.verifying = false;
       updateConfirmButtonState();
+      updateSubmitState();
     }
   };
 
@@ -1337,7 +1362,7 @@ function initPatientDataPage() {
     // Aquí puedes fijar el prefijo por defecto o habilitar/deshabilitar el cambio de país.
     countrySelect.value = getSelectedCountry().code;
     countrySelect.addEventListener("change", () => {
-      updatePhonePrefix();
+      updatePhoneDial();
       verificationState.phoneDigits = "";
       verificationState.codeSent = false;
       verificationState.codeValidated = false;
@@ -1345,10 +1370,11 @@ function initPatientDataPage() {
       if (sendFeedback) sendFeedback.textContent = "";
       if (codeError) codeError.textContent = "";
       updatePhoneState();
+      updateSubmitState();
     });
   }
 
-  updatePhonePrefix();
+  updatePhoneDial();
   updatePhoneState();
 
   if (phoneInput) {
@@ -1363,13 +1389,153 @@ function initPatientDataPage() {
     codeInput.addEventListener("input", () => {
       codeInput.value = clampDigits(codeInput.value, 6);
       if (codeError) codeError.textContent = "";
+      appointmentState.code = codeInput.value;
       updateConfirmButtonState();
+      updateSubmitState();
     });
   }
 
   if (confirmCodeButton) {
     confirmCodeButton.addEventListener("click", verifyCode);
   }
+
+  const ensureFieldValidity = () => {
+    if (rutError) {
+      const rutResult = validateRut(appointmentState.rut);
+      rutError.textContent = rutResult.valid ? "" : rutResult.message;
+    }
+    if (nameError) {
+      const result = validateName(appointmentState.fullName);
+      nameError.textContent = result.valid ? "" : result.message;
+    }
+    if (emailError) {
+      const result = validateEmail(appointmentState.email);
+      emailError.textContent = result.valid ? "" : result.message;
+    }
+  };
+
+  const buildAppointmentPayload = () => {
+    // Aquí se arma el objeto de cita que se envía a Confirmación y al backend.
+    return {
+      patient: {
+        rut: appointmentState.rut,
+        name: appointmentState.fullName,
+        email: appointmentState.email,
+        phone: `${verificationState.lastDialCode || getSelectedCountry().dialCode}${verificationState.phoneDigits}`
+      },
+      schedule: {
+        dateKey,
+        time,
+        professionalId,
+        professionalName: professional?.name ?? "",
+        modality,
+        duration,
+        price,
+        service
+      }
+    };
+  };
+
+  const sendConfirmationEmail = async (payload) => {
+    // TODO: conectar con backend real para enviar email de confirmación.
+    await fetch("/api/enviar-confirmacion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  };
+
+  const handleSubmit = async () => {
+    appointmentState.selectionValid = Boolean(dateKey && time);
+    ensureFieldValidity();
+
+    if (!appointmentState.selectionValid) {
+      if (selectionElement) selectionElement.textContent = "Selecciona una fecha y hora para continuar.";
+      return;
+    }
+
+    const rutValid = validateRut(appointmentState.rut).valid;
+    const nameValid = validateName(appointmentState.fullName).valid;
+    const emailValid = validateEmail(appointmentState.email).valid;
+    const country = getSelectedCountry();
+    const phoneValid = validatePhoneDigits(verificationState.phoneDigits, country).valid;
+    const codeValid = verificationState.codeValidated && appointmentState.code.length === 6;
+
+    if (!rutValid || !nameValid || !emailValid || !phoneValid || !codeValid) {
+      if (!verificationState.codeValidated && codeError) {
+        codeError.textContent = "Confirma el código SMS para continuar.";
+      }
+      updateSubmitState();
+      return;
+    }
+
+    const payload = buildAppointmentPayload();
+    try {
+      await sendConfirmationEmail(payload);
+    } catch (error) {
+      // Conservamos la navegación aunque el mock falle para fines de flujo.
+    }
+
+    sessionStorage.setItem("appointmentConfirmation", JSON.stringify(payload));
+    window.location.href = "./confirmacion.html";
+  };
+
+  if (confirmAppointmentButton) {
+    confirmAppointmentButton.addEventListener("click", handleSubmit);
+  }
+
+  updateSubmitState();
+}
+
+function initConfirmationPage() {
+  const root = document.querySelector(".appointment-confirmation");
+  if (!root) return;
+
+  const dateElement = root.querySelector("[data-confirmation-date]");
+  const timeElement = root.querySelector("[data-confirmation-time]");
+  const professionalElement = root.querySelector("[data-confirmation-professional]");
+  const modalityElement = root.querySelector("[data-confirmation-modality]");
+  const venueElement = root.querySelector("[data-confirmation-venue]");
+
+  let payload = null;
+  try {
+    const stored = sessionStorage.getItem("appointmentConfirmation");
+    payload = stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    payload = null;
+  }
+
+  if (payload?.schedule?.dateKey && dateElement) {
+    dateElement.textContent = formatDayLabel(payload.schedule.dateKey);
+  }
+  if (payload?.schedule?.time && timeElement) {
+    timeElement.textContent = payload.schedule.time;
+  }
+  if (payload?.schedule?.professionalName && professionalElement) {
+    professionalElement.textContent = payload.schedule.professionalName;
+  }
+  if (payload?.schedule?.modality && modalityElement) {
+    modalityElement.textContent = payload.schedule.modality;
+  }
+  if (!payload?.schedule?.venue && venueElement) {
+    venueElement.textContent = venueElement.textContent || "Sede Chillán";
+  }
+
+  const triggerEmailConfirmation = async () => {
+    if (!payload) return;
+    // TODO: conectar con backend real para enviar email de confirmación al llegar a esta vista.
+    try {
+      await fetch("/api/enviar-confirmacion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      // Mantén este bloque por si el endpoint mock falla en ambiente local.
+    }
+  };
+
+  triggerEmailConfirmation();
 }
 
 function getCurrentPage() {
@@ -1379,7 +1545,9 @@ function getCurrentPage() {
 
 function initNavigationHighlight() {
   const currentPage = getCurrentPage();
-  const highlightPage = ["horarios", "datos"].includes(currentPage) ? "agendar" : currentPage;
+  const highlightPage = ["horarios", "datos", "confirmacion"].includes(currentPage)
+    ? "agendar"
+    : currentPage;
   const navLinks = document.querySelectorAll(".site-nav [data-nav-target]");
 
   navLinks.forEach((link) => {
@@ -1645,7 +1813,8 @@ const pageInitializers = {
   quienes: initAboutPage,
   agendar: initBookingPage,
   horarios: initSchedulePage,
-  datos: initPatientDataPage
+  datos: initPatientDataPage,
+  confirmacion: initConfirmationPage
 };
 
 window.addEventListener("DOMContentLoaded", () => {
