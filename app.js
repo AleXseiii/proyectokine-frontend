@@ -1071,33 +1071,11 @@ function initIdentityAccessPage() {
   const form = document.querySelector(".identity-form");
   if (!form) return;
 
-  const rutInput = form.querySelector('input[name="rut"]');
-  const phoneInput = form.querySelector('input[name="telefono"]');
-  const codeInput = form.querySelector('input[name="codigo"]');
-  const smsCheckbox = form.querySelector('input[name="sms"]');
+  const emailInput = form.querySelector('input[name="email"]');
+  const passwordInput = form.querySelector('input[name="password"]');
   const submitButton = form.querySelector('button[type="submit"]');
   const statusMessage = form.querySelector("[data-identity-status]");
 
-  const state = {
-    phoneDigits: "",
-    lastSentPhone: "",
-    sending: false,
-    verifying: false,
-    codeSent: false,
-    verified: false
-  };
-
-  const phoneExpectedLength = 9;
-  const dialCode = "+56";
-
-  const formatPhone = (digits) => {
-    const clean = clampDigits(digits, phoneExpectedLength);
-    if (!clean) return "";
-    const first = clean.slice(0, 1);
-    const middle = clean.slice(1, 5);
-    const last = clean.slice(5, 9);
-    return `${dialCode} ${first}${middle ? ` ${middle}` : ""}${last ? ` ${last}` : ""}`.trim();
-  };
 
   const setStatus = (message) => {
     if (statusMessage) {
@@ -1105,168 +1083,40 @@ function initIdentityAccessPage() {
     }
   };
 
-  const validatePhone = (digits) => digits.length === phoneExpectedLength;
-
   const updateButton = () => {
     if (!submitButton) return;
-    const rutValid = validateRut(rutInput?.value ?? "").valid;
-    const phoneValid = validatePhone(state.phoneDigits);
-    const hasConsent = smsCheckbox?.checked ?? false;
-    submitButton.disabled =
-      state.sending || state.verifying || !rutValid || !phoneValid || !hasConsent || state.verified;
-    submitButton.textContent = state.codeSent ? "Validar código" : "Enviar código";
+    const emailValid = validateEmail(emailInput?.value ?? "").valid;
+    const hasPassword = Boolean(passwordInput?.value?.length);
+    submitButton.disabled = !(emailValid && hasPassword);
+    submitButton.textContent = "Ingresar";
+    
   };
+   if (emailInput) {
+    emailInput.addEventListener("input", () => {
 
-  const autoSendIfReady = () => {
-    const rutValid = validateRut(rutInput?.value ?? "").valid;
-    if (!rutValid) return;
-    if (!validatePhone(state.phoneDigits)) return;
-    if (state.lastSentPhone === state.phoneDigits || state.sending) return;
-    if (smsCheckbox && !smsCheckbox.checked) return;
-    sendSmsCode();
-  };
 
-  const handleRutInput = () => {
-    if (!rutInput) return;
-    const selectionStart = rutInput.selectionStart || 0;
-    const cleanValue = clampDigits(rutInput.value, 9);
-    const digitsBeforeCaret = clampDigits(rutInput.value.slice(0, selectionStart), 9);
-
-    rutInput.value = formatRutValue(cleanValue);
-
-    const nextCaretDigits = digitsBeforeCaret.length;
-    let caretIndex = rutInput.value.length;
-    let digitCount = 0;
-    for (let i = 0; i < rutInput.value.length; i += 1) {
-      if (/\d/.test(rutInput.value[i])) {
-        digitCount += 1;
-      }
-      if (digitCount >= nextCaretDigits) {
-        caretIndex = i + 1;
-        break;
-      }
-    }
-    rutInput.setSelectionRange(caretIndex, caretIndex);
-    updateButton();
-  };
-
-  const handlePhoneInput = () => {
-    if (!phoneInput) return;
-    const digits = clampDigits(phoneInput.value, phoneExpectedLength);
-    state.phoneDigits = digits;
-    state.codeSent = false;
-    state.verified = false;
-    phoneInput.value = formatPhone(digits);
-    if (codeInput) codeInput.value = "";
-    setStatus("");
-    updateButton();
-    autoSendIfReady();
-  };
-
-  const sendSmsCode = async () => {
-    if (state.sending || !validatePhone(state.phoneDigits)) return;
-    state.sending = true;
-    updateButton();
-    setStatus("Enviando SMS de verificación...");
-
-    try {
-      const response = await fetch(buildApiUrl("/api/enviar-codigo"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `${dialCode}${state.phoneDigits}` })
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo enviar el SMS.");
-      }
-
-      state.codeSent = true;
-      state.lastSentPhone = state.phoneDigits;
-      setStatus(`Código enviado al ${formatPhone(state.phoneDigits)}.`);
-    } catch (error) {
-      setStatus("No pudimos enviar el SMS. Intenta nuevamente.");
-    } finally {
-      state.sending = false;
-      updateButton();
-    }
-  };
-
-  const verifyCode = async () => {
-    if (!codeInput) return;
-    const code = clampDigits(codeInput.value, 6);
-    if (code.length < 6) {
-      setStatus("Ingresa los 6 dígitos del código de seguridad.");
-      return;
-    }
-    if (!state.codeSent) {
-      setStatus("Primero envía el SMS para recibir tu código.");
-      return;
-    }
-
-    state.verifying = true;
-    updateButton();
-    setStatus("Validando código...");
-
-    try {
-      const response = await fetch(buildApiUrl("/api/verificar-codigo"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `${dialCode}${state.phoneDigits}`, code })
-      });
-      const result = await response.json();
-      const isValid = Boolean(result?.valid);
-      state.verified = isValid;
-      setStatus(isValid ? "Código verificado. Acceso concedido." : "El código no es correcto.");
-      if (isValid && submitButton) {
-        submitButton.textContent = "Ingresar";
-      }
-    } catch (error) {
-      setStatus("No pudimos validar el código. Revisa tu conexión e inténtalo de nuevo.");
-    } finally {
-      state.verifying = false;
-      updateButton();
-    }
-  };
-
-  if (rutInput) {
-    rutInput.addEventListener("input", handleRutInput);
-    handleRutInput();
-  }
-
-  if (phoneInput) {
-    phoneInput.addEventListener("input", handlePhoneInput);
-    handlePhoneInput();
-  }
-
-  if (codeInput) {
-    codeInput.addEventListener("input", () => {
-      codeInput.value = clampDigits(codeInput.value, 6);
       setStatus("");
       updateButton();
     });
   }
 
-  if (smsCheckbox) {
-    smsCheckbox.addEventListener("change", () => {
+ if (passwordInput) {
+    passwordInput.addEventListener("input", () => {
       setStatus("");
       updateButton();
-      autoSendIfReady();
     });
   }
 
   if (form) {
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      if (!state.codeSent) {
-        sendSmsCode();
-      } else if (!state.verified) {
-        verifyCode();
-      }
+      setStatus("Ingreso enviado. Verificaremos tus credenciales.");
     });
   }
 
   updateButton();
 }
+
 
 function initPatientDataPage() {
   const root = document.querySelector(".patient-data");
@@ -1287,6 +1137,9 @@ function initPatientDataPage() {
   const backLink = root.querySelector("[data-patient-back]");
   const fullNameInput = root.querySelector("[data-patient-fullname]");
   const emailInput = root.querySelector("[data-patient-email]");
+  const phoneInput = root.querySelector("[data-patient-phone]");
+  const passwordInput = root.querySelector("[data-patient-password]");
+  const confirmPasswordInput = root.querySelector("[data-patient-password-confirm]");
   const service = params.get("service") ?? professional?.service ?? "";
   const modality = params.get("modality") ?? professional?.modality ?? "";
   const duration = params.get("duration") ?? professional?.duration ?? "";
@@ -1323,46 +1176,22 @@ function initPatientDataPage() {
   const rutError = root.querySelector("[data-rut-error]");
   const nameError = root.querySelector("[data-name-error]");
   const emailError = root.querySelector("[data-email-error]");
-  const countrySelect = root.querySelector("[data-phone-country]");
-  const phoneDial = root.querySelector("[data-phone-dial]");
-  const phoneInput = root.querySelector("[data-patient-phone]");
   const phoneError = root.querySelector("[data-phone-error]");
-  const sendButton = root.querySelector("[data-send-code]");
-  const sendFeedback = root.querySelector("[data-send-feedback]");
-  const codeInput = root.querySelector("[data-patient-code]");
-  const codeError = root.querySelector("[data-code-error]");
-  const confirmCodeButton = root.querySelector("[data-confirm-code]");
+   const passwordError = root.querySelector("[data-password-error]");
+  const passwordConfirmError = root.querySelector("[data-password-confirm-error]");
   const confirmAppointmentButton = root.querySelector("[data-patient-submit]");
 
-  const verificationState = {
-    sending: false,
-    verifying: false,
-    codeSent: false,
-    codeValidated: false,
-    phoneDigits: "",
-    lastSentPhone: "",
-    lastDialCode: ""
-  };
 
   const appointmentState = {
     rut: "",
     fullName: "",
     email: "",
-    code: "",
+    phone: "",
+    password: "",
+    passwordConfirm: "",
     selectionValid: Boolean(dateKey && time)
   };
 
-  const phoneCountries = [
-    { code: "CL", name: "Chile", dialCode: "+56", flag: "🇨🇱", minLength: 9, maxLength: 9, example: "9XXXXXXXX" },
-    { code: "AR", name: "Argentina", dialCode: "+54", flag: "🇦🇷", minLength: 10, maxLength: 10, example: "11XXXXXXXX" }
-    // Añade más países aquí si necesitas ampliar la lista de prefijos.
-  ];
-
-  const getCountryByCode = (code) => phoneCountries.find((item) => item.code === code);
-  const getSelectedCountry = () => {
-    const current = getCountryByCode(countrySelect?.value ?? "");
-    return current ?? phoneCountries.find((item) => item.code === "CL") ?? phoneCountries[0];
-  };
 
   if (rutInput) {
     rutInput.addEventListener("input", () => {
@@ -1413,193 +1242,59 @@ function initPatientDataPage() {
     });
   }
 
-  const maskPhone = (digits) => {
-    if (!digits) return "";
-    return digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
-  };
-
-  const getExpectedLength = (country) => country.maxLength ?? country.minLength ?? 9;
-
-  const validatePhoneDigits = (digits, country) => {
-    const expected = getExpectedLength(country);
-    if (!digits.length) return { valid: false, message: "" };
-    if (digits.length < expected) {
-      return { valid: false, message: `Ingresa ${expected} dígitos para ${country.name}.` };
-    }
-    return { valid: true, message: "" };
-  };
-
-  const clampPhoneDigits = (value, country) => clampDigits(value, country.maxLength ?? 12);
-
-  const updateConfirmButtonState = () => {
-    if (!confirmCodeButton) return;
-    const code = clampDigits(codeInput?.value ?? "", 6);
-    const country = getSelectedCountry();
-    const phoneValid = validatePhoneDigits(verificationState.phoneDigits, country).valid;
-    const canConfirm = verificationState.codeSent && code.length === 6 && phoneValid;
-    confirmCodeButton.disabled = !canConfirm || verificationState.verifying;
-  };
-
   const updateSubmitState = () => {
     if (!confirmAppointmentButton) return;
-    const country = getSelectedCountry();
     const rutValid = validateRut(appointmentState.rut).valid;
     const nameValid = validateName(appointmentState.fullName).valid;
     const emailValid = validateEmail(appointmentState.email).valid;
-    const phoneValid = validatePhoneDigits(verificationState.phoneDigits, country).valid;
-    const codeValid = verificationState.codeValidated && appointmentState.code.length === 6;
+    const phoneValid = appointmentState.phone.length === 9;
+    const passwordValid = appointmentState.password.length >= 6;
+    const passwordsMatch = passwordValid && appointmentState.password === appointmentState.passwordConfirm;
     const ready =
-      rutValid && nameValid && emailValid && phoneValid && codeValid && appointmentState.selectionValid;
+    rutValid && nameValid && emailValid && phoneValid && passwordsMatch && appointmentState.selectionValid;
     confirmAppointmentButton.disabled = !ready;
   };
 
-  const updatePhoneDial = () => {
-    const country = getSelectedCountry();
-    if (phoneDial) {
-      phoneDial.textContent = `${country.flag} ${country.dialCode}`;
-    }
-    if (phoneInput) {
-      phoneInput.placeholder = country.example ?? "";
-    }
-    verificationState.lastDialCode = country.dialCode;
-     // Si quieres cambiar el país por defecto, modifica phoneCountries o setea countrySelect.value aquí.
-  };
   
   const updatePhoneState = () => {
     if (!phoneInput) return;
-    const country = getSelectedCountry();
-    const digits = clampPhoneDigits(phoneInput.value, country);
+    const digits = clampDigits(phoneInput.value, 9);
     phoneInput.value = digits;
-    verificationState.phoneDigits = digits;
+    appointmentState.phone = digits;
     if (phoneError) {
-    const result = validatePhoneDigits(digits, country);
-      phoneError.textContent = result.valid ? "" : result.message;
+            const valid = digits.length === 9;
+      phoneError.textContent = valid ? "" : "Ingresa 9 dígitos para tu celular.";
     }
-    updateConfirmButtonState();
     updateSubmitState();
   };
+  const validatePasswords = () => {
+    if (!passwordInput || !confirmPasswordInput) return;
+    const passwordValue = passwordInput.value;
+    const confirmValue = confirmPasswordInput.value;
+    appointmentState.password = passwordValue;
+    appointmentState.passwordConfirm = confirmValue;
 
-  const sendVerificationCode = async () => {
-    if (!sendButton) return;
-    const country = getSelectedCountry();
-    const digits = verificationState.phoneDigits;
-    const validation = validatePhoneDigits(digits, country);
-    if (!validation.valid) {
-      if (phoneError) phoneError.textContent = validation.message;
-      return;
+    const hasLength = passwordValue.length >= 6;
+    if (passwordError) {
+      passwordError.textContent = hasLength ? "" : "La contraseña debe tener al menos 6 caracteres.";
     }
+    const match = hasLength && passwordValue === confirmValue;
+    if (passwordConfirmError) {
+      passwordConfirmError.textContent = match ? "" : "Las contraseñas deben coincidir.";
 
-    verificationState.sending = true;
-    sendButton.disabled = true;
-    if (sendFeedback) {
-      sendFeedback.textContent = "Enviando código...";
     }
-
-    try {
-      await fetch(buildApiUrl("/api/enviar-codigo"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: `${country.dialCode}${digits}` })
-      });
-
-      verificationState.codeSent = true;
-      verificationState.lastSentPhone = digits;
-      verificationState.lastDialCode = country.dialCode;
-      if (sendFeedback) {
-      sendFeedback.textContent = `Código enviado al ${country.dialCode} ${maskPhone(digits)}`;
-      }
-      if (codeError) codeError.textContent = "";
-      updateConfirmButtonState();
-      updateSubmitState();
-    } catch (error) {
-      if (sendFeedback) {
-        sendFeedback.textContent = "No se pudo enviar el código. Inténtalo nuevamente.";
-      }
-    } finally {
-      verificationState.sending = false;
-      sendButton.disabled = false;
-    }
+    updateSubmitState();
   };
-
-  const verifyCode = async () => {
-    if (!codeInput) return;
-    const code = clampDigits(codeInput.value, 6);
-    if (code.length < 6) {
-      if (codeError) codeError.textContent = "El código debe tener 6 dígitos.";
-      return;
-    }
-    if (!verificationState.codeSent) {
-      if (codeError) codeError.textContent = "Primero envía el código a tu celular.";
-      return;
-    }
-
-    verificationState.verifying = true;
-    updateConfirmButtonState();
-    if (codeError) codeError.textContent = "";
-
-    try {
-      const response = await fetch(buildApiUrl("/api/verificar-codigo"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: `${verificationState.lastDialCode}${verificationState.phoneDigits}`,
-          code
-        })
-      });
-      const result = await response.json();
-      const isValid = Boolean(result?.valid);
-      verificationState.codeValidated = isValid;
-      if (codeError) {
-        codeError.textContent = isValid ? "Código confirmado." : "El código no es correcto.";
-      }
-    } catch (error) {
-      if (codeError) codeError.textContent = "No pudimos validar el código. Intenta nuevamente.";
-    } finally {
-      verificationState.verifying = false;
-      updateConfirmButtonState();
-      updateSubmitState();
-    }
-  };
-
-   if (countrySelect) {
-    // Aquí puedes fijar el prefijo por defecto o habilitar/deshabilitar el cambio de país.
-    countrySelect.value = getSelectedCountry().code;
-    countrySelect.addEventListener("change", () => {
-      updatePhoneDial();
-      verificationState.phoneDigits = "";
-      verificationState.codeSent = false;
-      verificationState.codeValidated = false;
-      if (phoneInput) phoneInput.value = "";
-      if (sendFeedback) sendFeedback.textContent = "";
-      if (codeError) codeError.textContent = "";
-      updatePhoneState();
-      updateSubmitState();
-    });
-  }
-
-  updatePhoneDial();
-  updatePhoneState();
-
   if (phoneInput) {
     phoneInput.addEventListener("input", updatePhoneState);
+     updatePhoneState();
+  }
+  if (passwordInput) {
+    passwordInput.addEventListener("input", validatePasswords);
   }
 
-  if (sendButton) {
-    sendButton.addEventListener("click", sendVerificationCode);
-  }
-
-  if (codeInput) {
-    codeInput.addEventListener("input", () => {
-      codeInput.value = clampDigits(codeInput.value, 6);
-      if (codeError) codeError.textContent = "";
-      appointmentState.code = codeInput.value;
-      updateConfirmButtonState();
-      updateSubmitState();
-    });
-  }
-
-  if (confirmCodeButton) {
-    confirmCodeButton.addEventListener("click", verifyCode);
+  if (confirmPasswordInput) {
+    confirmPasswordInput.addEventListener("input", validatePasswords);
   }
 
   const ensureFieldValidity = () => {
@@ -1615,6 +1310,21 @@ function initPatientDataPage() {
       const result = validateEmail(appointmentState.email);
       emailError.textContent = result.valid ? "" : result.message;
     }
+        if (phoneError) {
+      const valid = appointmentState.phone.length === 9;
+      phoneError.textContent = valid ? "" : "Ingresa 9 dígitos para tu celular.";
+    }
+    if (passwordError) {
+      passwordError.textContent = appointmentState.password.length >= 6
+        ? ""
+        : "La contraseña debe tener al menos 6 caracteres.";
+    }
+    if (passwordConfirmError) {
+      const match =
+        appointmentState.password.length >= 6 &&
+        appointmentState.password === appointmentState.passwordConfirm;
+      passwordConfirmError.textContent = match ? "" : "Las contraseñas deben coincidir.";
+    }
   };
 
   const buildAppointmentPayload = () => {
@@ -1624,7 +1334,8 @@ function initPatientDataPage() {
         rut: appointmentState.rut,
         name: appointmentState.fullName,
         email: appointmentState.email,
-        phone: `${verificationState.lastDialCode || getSelectedCountry().dialCode}${verificationState.phoneDigits}`
+        phone: appointmentState.phone,
+        password: appointmentState.password
       },
       schedule: {
         dateKey,
@@ -1640,7 +1351,7 @@ function initPatientDataPage() {
   };
 
   const sendConfirmationEmail = async (payload) => {
-        await fetch(buildApiUrl("/api/enviar-confirmacion"), {
+      await fetch(buildApiUrl("/api/enviar-confirmacion"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -1659,14 +1370,11 @@ function initPatientDataPage() {
     const rutValid = validateRut(appointmentState.rut).valid;
     const nameValid = validateName(appointmentState.fullName).valid;
     const emailValid = validateEmail(appointmentState.email).valid;
-    const country = getSelectedCountry();
-    const phoneValid = validatePhoneDigits(verificationState.phoneDigits, country).valid;
-    const codeValid = verificationState.codeValidated && appointmentState.code.length === 6;
+     const phoneValid = appointmentState.phone.length === 9;
+    const passwordValid = appointmentState.password.length >= 6;
+    const passwordsMatch = passwordValid && appointmentState.password === appointmentState.passwordConfirm;
 
-    if (!rutValid || !nameValid || !emailValid || !phoneValid || !codeValid) {
-      if (!verificationState.codeValidated && codeError) {
-        codeError.textContent = "Confirma el código SMS para continuar.";
-      }
+    if (!rutValid || !nameValid || !emailValid || !phoneValid || !passwordsMatch) {
       updateSubmitState();
       return;
     }

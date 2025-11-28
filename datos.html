@@ -24,7 +24,7 @@
         <a data-nav-target="valores" href="./valores.html">Valores</a>
         <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
         <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
-      <a data-nav-target="ingresar" href="./ingreseAqui.html">Ingresar</a>
+        <a data-nav-target="ingresar" href="./ingreseAqui.html">Ingresar</a>
       </nav>
     </header>
 
@@ -53,49 +53,33 @@
             <input type="email" name="email" placeholder="nombre@correo.com" data-patient-email />
             <span class="checkout-form__error" data-email-error aria-live="polite"></span>
           </label>
-          <div class="checkout-form__field checkout-form__field--phone">
+           <label class="checkout-form__field checkout-form__field--phone">
             <span>Número celular</span>
-            <div class="phone-input" data-phone-wrapper>
-              <label class="phone-input__country" aria-label="Seleccionar país">
-                <select data-phone-country>
-                  <option value="CL">🇨🇱 Chile (+56)</option>
-                  <option value="AR">🇦🇷 Argentina (+54)</option>
-                  <!-- Ajusta la lista de países/códigos en app.js para habilitar más opciones. -->
-                </select>
-                <!-- El país por defecto se fija en app.js y puedes cambiarlo aquí o en el script. -->
-              </label>
-              <div class="phone-input__number">
-                <span class="phone-input__dial" data-phone-dial>+56</span>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="9XXXXXXXX"
-                  inputmode="numeric"
-                  pattern="[0-9]*"
-                  data-patient-phone
-                />
-              </div>
-              <button class="checkout-form__verify checkout-form__verify--ghost" type="button" data-send-code>
-                Enviar código
-              </button>
-            </div>
-             <span class="checkout-form__error" data-phone-error aria-live="polite"></span>
-            <p class="checkout-form__helper" data-send-feedback aria-live="polite"></p>
-          </div>
-          <div class="checkout-form__verification">
-             <label class="checkout-form__field checkout-form__field--code">
-              <span>Código verificador</span>
-                <input
-                    type="text"
-                    name="code"
-                    placeholder="123456"
-                    inputmode="numeric"
-                    pattern="[0-9]*"
-                    data-patient-code
-              <span class="checkout-form__error" data-code-error aria-live="polite"></span>
-            </label>
-            <button class="checkout-form__verify" type="button" data-confirm-code disabled>Confirmar código</button>
-          </div>
+        <input
+              type="tel"
+              name="phone"
+              placeholder="9XXXXXXXX"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              data-patient-phone
+            />
+            <span class="checkout-form__error" data-phone-error aria-live="polite"></span>
+          </label>
+          <label class="checkout-form__field">
+            <span>Contraseña</span>
+            <input type="password" name="password" placeholder="Crea una contraseña" data-patient-password />
+            <span class="checkout-form__error" data-password-error aria-live="polite"></span>
+          </label>
+          <label class="checkout-form__field">
+            <span>Confirmar contraseña</span>
+            <input
+              type="password"
+              name="password-confirm"
+              placeholder="Repite tu contraseña"
+              data-patient-password-confirm
+            />
+            <span class="checkout-form__error" data-password-confirm-error aria-live="polite"></span>
+          </label>
         </section>
         <aside class="checkout-summary" aria-label="Resumen de la hora">
           <header class="checkout-summary__profile">

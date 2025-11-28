@@ -30,37 +30,24 @@
 
     <main class="identity-access">
       <section class="identity-card" aria-labelledby="identity-title">
-        <div class="identity-card__badge">Identidad</div>
-        <h1 id="identity-title">Acceso a tu identidad</h1>
+         <div class="identity-card__badge">Ingresar</div>
+        <h1 id="identity-title">Accede a tu cuenta</h1>
         <p class="identity-card__lead">
-          Ingresa tu RUT y número celular asociado a tu ficha para recibir un código de verificación
+                  Usa el correo registrado y la contraseña que creaste para continuar
         </p>
 
         <form class="identity-form" autocomplete="on">
           <label class="identity-field">
-            <span>RUT del paciente</span>
-            <input type="text" name="rut" placeholder="XX.XXX.XXX-X" inputmode="numeric" />
-          </label>
+            <span>Contraseña</span>
+            <input type="password" name="password" placeholder="Ingresa tu contraseña" />
 
           <label class="identity-field">
             <span>Número celular</span>
             <input type="tel" name="telefono" placeholder="+56 9 — — — — — — — —" inputmode="tel" />
           </label>
 
-          <label class="identity-field">
-            <span>Ingrese el código de verificación</span>
-            <input type="text" name="codigo" placeholder="Ingresa el código recibido" inputmode="numeric" />
-          </label>
-
-          <label class="identity-checkbox">
-            <input type="checkbox" name="sms" checked />
-            <span>Acepto recibir SMS</span>
-          </label>
-
-          <button type="submit" class="button button--full">Enviar código</button>
-          <p class="identity-card__helper" data-identity-status role="status" aria-live="polite">
-            No compartiremos tu número. SMS válido 5 minutos
-          </p>
+   <button type="submit" class="button button--full">Ingresar</button>
+          <p class="identity-card__helper" data-identity-status role="status" aria-live="polite"></p>
         </form>
       </section>
     </main>
