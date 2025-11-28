@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de salud y Bienestar - Acceso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./home.css" />
+</head>
+<body data-page="ingresar">
+  <div class="layout">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand__logo"></div>
+        <div class="brand__text">
+          <span>Centro de salud y</span>
+          <span class="brand__text--bold">Bienestar</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a data-nav-target="home" href="./home.html#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="ingresar" href="./ingreseAqui.html">Ingresar</a>
+      </nav>
+    </header>
+
+    <main class="identity-access">
+      <section class="identity-card" aria-labelledby="identity-title">
+        <div class="identity-card__badge">Identidad</div>
+        <h1 id="identity-title">Acceso a tu identidad</h1>
+        <p class="identity-card__lead">
+          Ingresa tu RUT y número celular asociado a tu ficha para recibir un código de verificación
+        </p>
+
+        <form class="identity-form" autocomplete="on">
+          <label class="identity-field">
+            <span>RUT del paciente</span>
+            <input type="text" name="rut" placeholder="RUT (sin puntos ni guión)" inputmode="numeric" />
+          </label>
+
+          <label class="identity-field">
+            <span>Número celular</span>
+            <input type="tel" name="telefono" placeholder="+56 9 — — — — — — — —" inputmode="tel" />
+          </label>
+
+          <label class="identity-field">
+            <span>Ingrese el código de verificación</span>
+            <input type="text" name="codigo" placeholder="Ingresa el código recibido" inputmode="numeric" />
+          </label>
+
+          <label class="identity-checkbox">
+            <input type="checkbox" name="sms" checked />
+            <span>Acepto recibir SMS</span>
+          </label>
+
+          <button type="submit" class="button button--full">Enviar código</button>
+          <p class="identity-card__helper">No compartiremos tu número. SMS válido 5 minutos</p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

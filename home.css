@@ -2620,6 +2620,9 @@ a {
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 18px;
   border-radius: 12px;
   background: linear-gradient(120deg, #6feacb, #3fc3b4);
@@ -2637,6 +2640,127 @@ a {
   color: #6feacb;
   box-shadow: none;
 }
+
+/* ---------- Pestaña Ingresar (acceso a identidad) ---------- */
+
+.identity-access {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 6vw, 72px) 0;
+}
+
+.identity-card {
+  position: relative;
+  width: min(760px, 100%);
+  padding: clamp(28px, 5vw, 42px);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, rgba(17, 82, 72, 0.95), rgba(8, 46, 40, 0.97));
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(109, 240, 192, 0.1);
+  overflow: hidden;
+}
+
+.identity-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(109, 240, 192, 0.16), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(52, 195, 163, 0.12), transparent 40%);
+  pointer-events: none;
+}
+
+.identity-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(109, 240, 192, 0.12);
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.identity-card h1 {
+  margin-top: 14px;
+  font-size: clamp(26px, 5vw, 34px);
+}
+
+.identity-card__lead {
+  margin: 12px 0 24px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.identity-form {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  z-index: 1;
+}
+
+.identity-field {
+  display: grid;
+  gap: 8px;
+}
+
+.identity-field span {
+  font-weight: 600;
+}
+
+.identity-field input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 33, 27, 0.5);
+  color: var(--text-main);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.identity-field input::placeholder {
+  color: rgba(240, 255, 247, 0.6);
+}
+
+.identity-field input:focus {
+  border-color: rgba(109, 240, 192, 0.6);
+  box-shadow: 0 0 0 3px rgba(109, 240, 192, 0.2);
+  background: rgba(4, 33, 27, 0.7);
+}
+
+.identity-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.identity-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.button--full {
+  display: inline-flex;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+}
+
+.identity-card__helper {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 14px;
+}
+
 
 @media (max-width: 900px) {
    /* Ajusta aquí el breakpoint para volver al layout vertical en pantallas pequeñas. */
