@@ -1,6 +1,74 @@
 // Marca el documento como compatible con interacciones JavaScript.
 document.documentElement.classList.add("has-js");
 
+// Base para llamadas al backend. Si defines window.__API_BASE_URL__ antes de cargar el
+// script, se utilizará para prefijar los endpoints (ej: "https://backend.midominio.cl").
+const API_BASE_URL = window.__API_BASE_URL__ || "";
+const buildApiUrl = (path) => `${API_BASE_URL}${path}`;
+
+const clampDigits = (value = "", maxLength = 0) => value.replace(/\D/g, "").slice(0, maxLength || undefined);
+
+const formatRutValue = (digits) => {
+  if (!digits) return "";
+  const clean = clampDigits(digits, 9);
+  const body = clean.slice(0, -1);
+  const verifier = clean.slice(-1);
+
+  if (!body) return verifier;
+
+  const reversed = body.split("").reverse();
+  const groups = [];
+  for (let i = 0; i < reversed.length; i += 3) {
+    groups.push(reversed.slice(i, i + 3).reverse().join(""));
+  }
+
+  return `${groups.reverse().join(".")}-${verifier}`;
+};
+
+const calculateVerifierDigit = (body) => {
+  let sum = 0;
+  let multiplier = 2;
+
+  for (let i = body.length - 1; i >= 0; i -= 1) {
+    sum += Number.parseInt(body[i], 10) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = 11 - (sum % 11);
+  if (remainder === 11) return "0";
+  if (remainder === 10) return "k";
+  return String(remainder);
+};
+
+const validateRut = (digits) => {
+  const clean = clampDigits(digits, 9);
+  if (clean.length < 7) return { valid: false, message: "Ingresa un RUT válido." };
+
+  const body = clean.slice(0, -1);
+  const verifier = clean.slice(-1);
+  const expectedVerifier = calculateVerifierDigit(body);
+  const isValid = verifier === expectedVerifier;
+  return {
+    valid: isValid,
+    message: isValid ? "" : "El dígito verificador no es correcto."
+  };
+};
+
+const validateEmail = (value) => {
+  if (!value) return { valid: false, message: "Ingresa un correo electrónico." };
+  const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+  const isValid = emailRegex.test(value.trim());
+  return { valid: isValid, message: isValid ? "" : "Correo inválido." };
+};
+
+const validateName = (value) => {
+  if (!value) return { valid: false, message: "Ingresa el nombre del paciente." };
+  if (value.trim().length < 4) {
+    return { valid: false, message: "El nombre debe tener al menos 4 caracteres." };
+  }
+  return { valid: true, message: "" };
+};
+
 // Actualiza esta configuración para ajustar la información y servicios de cada profesional.
 const professionals = {
   lissette: {
@@ -999,6 +1067,207 @@ const initializeScheduleView = () => {
   initializeScheduleView();
 }
 
+function initIdentityAccessPage() {
+  const form = document.querySelector(".identity-form");
+  if (!form) return;
+
+  const rutInput = form.querySelector('input[name="rut"]');
+  const phoneInput = form.querySelector('input[name="telefono"]');
+  const codeInput = form.querySelector('input[name="codigo"]');
+  const smsCheckbox = form.querySelector('input[name="sms"]');
+  const submitButton = form.querySelector('button[type="submit"]');
+  const statusMessage = form.querySelector("[data-identity-status]");
+
+  const state = {
+    phoneDigits: "",
+    lastSentPhone: "",
+    sending: false,
+    verifying: false,
+    codeSent: false,
+    verified: false
+  };
+
+  const phoneExpectedLength = 9;
+  const dialCode = "+56";
+
+  const formatPhone = (digits) => {
+    const clean = clampDigits(digits, phoneExpectedLength);
+    if (!clean) return "";
+    const first = clean.slice(0, 1);
+    const middle = clean.slice(1, 5);
+    const last = clean.slice(5, 9);
+    return `${dialCode} ${first}${middle ? ` ${middle}` : ""}${last ? ` ${last}` : ""}`.trim();
+  };
+
+  const setStatus = (message) => {
+    if (statusMessage) {
+      statusMessage.textContent = message;
+    }
+  };
+
+  const validatePhone = (digits) => digits.length === phoneExpectedLength;
+
+  const updateButton = () => {
+    if (!submitButton) return;
+    const rutValid = validateRut(rutInput?.value ?? "").valid;
+    const phoneValid = validatePhone(state.phoneDigits);
+    const hasConsent = smsCheckbox?.checked ?? false;
+    submitButton.disabled =
+      state.sending || state.verifying || !rutValid || !phoneValid || !hasConsent || state.verified;
+    submitButton.textContent = state.codeSent ? "Validar código" : "Enviar código";
+  };
+
+  const autoSendIfReady = () => {
+    const rutValid = validateRut(rutInput?.value ?? "").valid;
+    if (!rutValid) return;
+    if (!validatePhone(state.phoneDigits)) return;
+    if (state.lastSentPhone === state.phoneDigits || state.sending) return;
+    if (smsCheckbox && !smsCheckbox.checked) return;
+    sendSmsCode();
+  };
+
+  const handleRutInput = () => {
+    if (!rutInput) return;
+    const selectionStart = rutInput.selectionStart || 0;
+    const cleanValue = clampDigits(rutInput.value, 9);
+    const digitsBeforeCaret = clampDigits(rutInput.value.slice(0, selectionStart), 9);
+
+    rutInput.value = formatRutValue(cleanValue);
+
+    const nextCaretDigits = digitsBeforeCaret.length;
+    let caretIndex = rutInput.value.length;
+    let digitCount = 0;
+    for (let i = 0; i < rutInput.value.length; i += 1) {
+      if (/\d/.test(rutInput.value[i])) {
+        digitCount += 1;
+      }
+      if (digitCount >= nextCaretDigits) {
+        caretIndex = i + 1;
+        break;
+      }
+    }
+    rutInput.setSelectionRange(caretIndex, caretIndex);
+    updateButton();
+  };
+
+  const handlePhoneInput = () => {
+    if (!phoneInput) return;
+    const digits = clampDigits(phoneInput.value, phoneExpectedLength);
+    state.phoneDigits = digits;
+    state.codeSent = false;
+    state.verified = false;
+    phoneInput.value = formatPhone(digits);
+    if (codeInput) codeInput.value = "";
+    setStatus("");
+    updateButton();
+    autoSendIfReady();
+  };
+
+  const sendSmsCode = async () => {
+    if (state.sending || !validatePhone(state.phoneDigits)) return;
+    state.sending = true;
+    updateButton();
+    setStatus("Enviando SMS de verificación...");
+
+    try {
+      const response = await fetch(buildApiUrl("/api/enviar-codigo"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: `${dialCode}${state.phoneDigits}` })
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo enviar el SMS.");
+      }
+
+      state.codeSent = true;
+      state.lastSentPhone = state.phoneDigits;
+      setStatus(`Código enviado al ${formatPhone(state.phoneDigits)}.`);
+    } catch (error) {
+      setStatus("No pudimos enviar el SMS. Intenta nuevamente.");
+    } finally {
+      state.sending = false;
+      updateButton();
+    }
+  };
+
+  const verifyCode = async () => {
+    if (!codeInput) return;
+    const code = clampDigits(codeInput.value, 6);
+    if (code.length < 6) {
+      setStatus("Ingresa los 6 dígitos del código de seguridad.");
+      return;
+    }
+    if (!state.codeSent) {
+      setStatus("Primero envía el SMS para recibir tu código.");
+      return;
+    }
+
+    state.verifying = true;
+    updateButton();
+    setStatus("Validando código...");
+
+    try {
+      const response = await fetch(buildApiUrl("/api/verificar-codigo"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: `${dialCode}${state.phoneDigits}`, code })
+      });
+      const result = await response.json();
+      const isValid = Boolean(result?.valid);
+      state.verified = isValid;
+      setStatus(isValid ? "Código verificado. Acceso concedido." : "El código no es correcto.");
+      if (isValid && submitButton) {
+        submitButton.textContent = "Ingresar";
+      }
+    } catch (error) {
+      setStatus("No pudimos validar el código. Revisa tu conexión e inténtalo de nuevo.");
+    } finally {
+      state.verifying = false;
+      updateButton();
+    }
+  };
+
+  if (rutInput) {
+    rutInput.addEventListener("input", handleRutInput);
+    handleRutInput();
+  }
+
+  if (phoneInput) {
+    phoneInput.addEventListener("input", handlePhoneInput);
+    handlePhoneInput();
+  }
+
+  if (codeInput) {
+    codeInput.addEventListener("input", () => {
+      codeInput.value = clampDigits(codeInput.value, 6);
+      setStatus("");
+      updateButton();
+    });
+  }
+
+  if (smsCheckbox) {
+    smsCheckbox.addEventListener("change", () => {
+      setStatus("");
+      updateButton();
+      autoSendIfReady();
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!state.codeSent) {
+        sendSmsCode();
+      } else if (!state.verified) {
+        verifyCode();
+      }
+    });
+  }
+
+  updateButton();
+}
+
 function initPatientDataPage() {
   const root = document.querySelector(".patient-data");
   if (!root) return;
@@ -1094,70 +1363,6 @@ function initPatientDataPage() {
     const current = getCountryByCode(countrySelect?.value ?? "");
     return current ?? phoneCountries.find((item) => item.code === "CL") ?? phoneCountries[0];
   };
-
-  const clampDigits = (value = "", maxLength = 0) => value.replace(/\D/g, "").slice(0, maxLength || undefined);
-
-  const formatRutValue = (digits) => {
-    if (!digits) return "";
-    const clean = clampDigits(digits, 9);
-    const body = clean.slice(0, -1);
-    const verifier = clean.slice(-1);
-
-    if (!body) return verifier;
-
-    const reversed = body.split("").reverse();
-    const groups = [];
-    for (let i = 0; i < reversed.length; i += 3) {
-      groups.push(reversed.slice(i, i + 3).reverse().join(""));
-    }
-
-    return `${groups.reverse().join(".")}-${verifier}`;
-  };
-
-  const calculateVerifierDigit = (body) => {
-    let sum = 0;
-    let multiplier = 2;
-
-    for (let i = body.length - 1; i >= 0; i -= 1) {
-      sum += Number.parseInt(body[i], 10) * multiplier;
-      multiplier = multiplier === 7 ? 2 : multiplier + 1;
-    }
-
-    const remainder = 11 - (sum % 11);
-    if (remainder === 11) return "0";
-    if (remainder === 10) return "k";
-    return String(remainder);
-  };
-
-  const validateRut = (digits) => {
-    const clean = clampDigits(digits, 9);
-    if (clean.length < 7) return { valid: false, message: "Ingresa un RUT válido." };
-
-    const body = clean.slice(0, -1);
-    const verifier = clean.slice(-1);
-    const expectedVerifier = calculateVerifierDigit(body);
-    const isValid = verifier === expectedVerifier;
-    return {
-      valid: isValid,
-      message: isValid ? "" : "El dígito verificador no es correcto."
-    };
-  };
-
-  const validateName = (value) => {
-    if (!value) return { valid: false, message: "Ingresa el nombre del paciente." };
-    if (value.trim().length < 4) {
-      return { valid: false, message: "El nombre debe tener al menos 4 caracteres." };
-    }
-    return { valid: true, message: "" };
-  };
-
-  const validateEmail = (value) => {
-    if (!value) return { valid: false, message: "Ingresa un correo electrónico." };
-    const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
-    const isValid = emailRegex.test(value.trim());
-    return { valid: isValid, message: isValid ? "" : "Correo inválido." };
-  };
-
 
   if (rutInput) {
     rutInput.addEventListener("input", () => {
@@ -1291,8 +1496,7 @@ function initPatientDataPage() {
     }
 
     try {
-     // TODO: conectar con backend real para enviar SMS (Twilio u otro proveedor).
-      await fetch("/api/enviar-codigo", {
+      await fetch(buildApiUrl("/api/enviar-codigo"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: `${country.dialCode}${digits}` })
@@ -1334,8 +1538,7 @@ function initPatientDataPage() {
     if (codeError) codeError.textContent = "";
 
     try {
-      // TODO: conectar con backend real para verificar el SMS.
-      const response = await fetch("/api/verificar-codigo", {
+      const response = await fetch(buildApiUrl("/api/verificar-codigo"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1437,8 +1640,7 @@ function initPatientDataPage() {
   };
 
   const sendConfirmationEmail = async (payload) => {
-    // TODO: conectar con backend real para enviar email de confirmación.
-    await fetch("/api/enviar-confirmacion", {
+        await fetch(buildApiUrl("/api/enviar-confirmacion"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -1523,9 +1725,8 @@ function initConfirmationPage() {
 
   const triggerEmailConfirmation = async () => {
     if (!payload) return;
-    // TODO: conectar con backend real para enviar email de confirmación al llegar a esta vista.
     try {
-      await fetch("/api/enviar-confirmacion", {
+            await fetch(buildApiUrl("/api/enviar-confirmacion"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -1809,6 +2010,7 @@ function initBookingPage() {
 
 const pageInitializers = {
   home: initHomePage,
+  ingresar: initIdentityAccessPage,
   valores: initValuesPage,
   quienes: initAboutPage,
   agendar: initBookingPage,

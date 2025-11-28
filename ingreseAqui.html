@@ -39,7 +39,7 @@
         <form class="identity-form" autocomplete="on">
           <label class="identity-field">
             <span>RUT del paciente</span>
-            <input type="text" name="rut" placeholder="RUT (sin puntos ni guión)" inputmode="numeric" />
+            <input type="text" name="rut" placeholder="XX.XXX.XXX-X" inputmode="numeric" />
           </label>
 
           <label class="identity-field">
@@ -58,7 +58,9 @@
           </label>
 
           <button type="submit" class="button button--full">Enviar código</button>
-          <p class="identity-card__helper">No compartiremos tu número. SMS válido 5 minutos</p>
+          <p class="identity-card__helper" data-identity-status role="status" aria-live="polite">
+            No compartiremos tu número. SMS válido 5 minutos
+          </p>
         </form>
       </section>
     </main>
