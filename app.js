@@ -1,9 +1,12 @@
 // Marca el documento como compatible con interacciones JavaScript.
 document.documentElement.classList.add("has-js");
 
-// Base para llamadas al backend. Si defines window.__API_BASE_URL__ antes de cargar el
-// script, se utilizará para prefijar los endpoints (ej: "https://backend.midominio.cl").
-const API_BASE_URL = window.__API_BASE_URL__ || "";
+// Base para llamadas al backend. Puedes configurarla de tres maneras:
+// 1) Definiendo window.__ENV__.API_BASE_URL en env.js (copiar env.js.example y ajustar).
+// 2) Definiendo window.__API_BASE_URL__ antes de cargar este script.
+// 3) Dejándola vacía para trabajar con rutas relativas.
+const API_BASE_URL =
+  (window.__ENV__ && window.__ENV__.API_BASE_URL) || window.__API_BASE_URL__ || "";
 const buildApiUrl = (path) => `${API_BASE_URL}${path}`;
 
 const clampDigits = (value = "", maxLength = 0) => value.replace(/\D/g, "").slice(0, maxLength || undefined);

@@ -2400,17 +2400,19 @@ a {
 }
 
 .schedule-checkout__grid {
-  /* Controla el layout de dos columnas en escritorio (formulario izquierda, resumen derecha). */
+  /* Formulario en la columna izquierda, resumen fijo a la derecha. */
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
   align-items: start;
   gap: 20px;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 .checkout-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 18px;
+   grid-template-columns: 1fr;
+  gap: 16px;
   padding: 22px;
   border-radius: 18px;
   background: rgba(4, 27, 23, 0.68);
