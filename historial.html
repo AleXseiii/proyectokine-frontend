@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de salud y Bienestar - Historial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./home.css" />
+</head>
+<body data-page="historial">
+  <div class="layout">
+    <header class="site-header">
+      <div class="brand">
+        <div class="brand__logo"></div>
+        <div class="brand__text">
+          <span>Centro de salud y</span>
+          <span class="brand__text--bold">Bienestar</span>
+        </div>
+      </div>
+      <nav class="site-nav">
+        <a data-nav-target="home" href="./home.html#inicio">Inicio</a>
+        <a data-nav-target="valores" href="./valores.html">Valores</a>
+        <a data-nav-target="quienes" href="./quienes.html">¿Quiénes somos?</a>
+        <a data-nav-target="agendar" href="./agendar.html">Agendar hora</a>
+        <a data-nav-target="historial" href="./historial.html">Seguimiento</a>
+        <a data-nav-target="ingresar" href="./ingreseAqui.html">Ingresar</a>
+      </nav>
+    </header>
+
+    <main class="history" aria-labelledby="history-title">
+      <aside class="history__sidebar" aria-label="Navegación del paciente">
+        <div class="history__profile">
+          <div class="history__avatar" aria-hidden="true"></div>
+          <div class="history__identity">
+            <span class="history__label">Paciente</span>
+            <strong class="history__name">Valentina Rojas</strong>
+            <p class="history__role">Rehabilitación musculoesquelética</p>
+          </div>
+        </div>
+        <nav class="history__menu" aria-label="Secciones de la cuenta">
+          <a class="history__menu-link" href="#">Perfil</a>
+          <a class="history__menu-link is-active" href="./historial.html" aria-current="page">Historial</a>
+          <a class="history__menu-link" href="#">Videos de apoyo</a>
+        </nav>
+        <p class="history__help">Puedes revisar cómo avanza tu tratamiento y los próximos controles en esta sección.</p>
+      </aside>
+
+      <section class="history__content">
+        <header class="history__header">
+          <div>
+            <div class="history__badge">Historial de sesiones</div>
+            <h1 id="history-title">Seguimiento clínico</h1>
+            <p class="history__description">Revisa el detalle de cada sesión con tu kinesiólogo y las recomendaciones para continuar con tu proceso.</p>
+          </div>
+          <label class="history__search" aria-label="Buscar en el historial">
+            <input type="search" name="search" placeholder="Buscar" />
+            <span class="history__search-icon" aria-hidden="true">🔍</span>
+          </label>
+        </header>
+
+        <div class="history__timeline" aria-live="polite">
+          <article class="history-session history-session--complete">
+            <div class="history-session__meta">
+              <div>
+                <p class="history-session__date">22 de octubre 2025</p>
+                <h2 class="history-session__title">Sesión inicial</h2>
+              </div>
+              <span class="history-session__status">Completado</span>
+            </div>
+            <p class="history-session__summary">El paciente presenta mejora en los rangos articulares y responde bien a la pauta de movilidad.</p>
+            <p class="history-session__note">Se mantiene el plan actual y se sugiere seguir con ejercicios en casa 3 veces por semana.</p>
+          </article>
+
+          <article class="history-session">
+            <div class="history-session__meta">
+              <div>
+                <p class="history-session__date">26 de octubre 2025</p>
+                <h2 class="history-session__title">Evaluación de progreso</h2>
+              </div>
+              <span class="history-session__status history-session__status--upcoming">Próximamente</span>
+            </div>
+            <p class="history-session__summary">Se recomienda realizar ejercicios domiciliarios enfocando la rutina en fortalecer glúteos y cuádriceps.</p>
+          </article>
+
+          <article class="history-session">
+            <div class="history-session__meta">
+              <div>
+                <p class="history-session__date">30 de octubre 2025</p>
+                <h2 class="history-session__title">Recovery</h2>
+              </div>
+              <span class="history-session__status history-session__status--upcoming">Próximamente</span>
+            </div>
+            <p class="history-session__summary">Se mantiene el trabajo sobre extensión y se agregan ejercicios de movilidad de cadera y tobillo.</p>
+          </article>
+
+          <article class="history-session">
+            <div class="history-session__meta">
+              <div>
+                <p class="history-session__date">05 de noviembre 2025</p>
+                <h2 class="history-session__title">Última sesión</h2>
+              </div>
+              <span class="history-session__status history-session__status--upcoming">Próximamente</span>
+            </div>
+            <p class="history-session__summary">Se realizará la última sesión para evaluar alta de tratamiento.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./env.js" defer></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
