@@ -1,13 +1,40 @@
 // Marca el documento como compatible con interacciones JavaScript.
 document.documentElement.classList.add("has-js");
 
-// Base para llamadas al backend. Puedes configurarla de tres maneras:
-// 1) Definiendo window.__ENV__.API_BASE_URL en env.js (copiar env.js.example y ajustar).
-// 2) Definiendo window.__API_BASE_URL__ antes de cargar este script.
-// 3) Dejándola vacía para trabajar con rutas relativas.
-const API_BASE_URL =
-  (window.__ENV__ && window.__ENV__.API_BASE_URL) || window.__API_BASE_URL__ || "";
-const buildApiUrl = (path) => `${API_BASE_URL}${path}`;
+const API_BASE_URL = window.API_BASE_URL || "";
+
+async function request(method, endpoint, body = null) {
+  const headers = { "Content-Type": "application/json" };
+  const token = localStorage.getItem("authToken");
+  if (token) {
+    headers.Authorization = `Token ${token}`;
+  }
+
+  const options = { method, headers };
+  if (body !== null) {
+    options.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+  const isJson = response.headers.get("content-type")?.includes("application/json");
+  const payload = isJson ? await response.json().catch(() => null) : null;
+
+  if (!response.ok) {
+    const message = payload?.detail || payload?.message || `Error ${response.status}`;
+    throw new Error(message);
+  }
+
+  if (response.status === 204) return null;
+  return payload;
+}
+
+async function getAppointments() {
+  return request("GET", "/api/appointments/");
+}
+
+async function getPatientData() {
+  return request("GET", "/api/users/me/");
+}
 
 const clampDigits = (value = "", maxLength = 0) => value.replace(/\D/g, "").slice(0, maxLength || undefined);
 
@@ -1092,7 +1119,7 @@ function initIdentityAccessPage() {
     const hasPassword = Boolean(passwordInput?.value?.length);
     submitButton.disabled = !(emailValid && hasPassword);
     submitButton.textContent = "Ingresar";
-    
+
   };
    if (emailInput) {
     emailInput.addEventListener("input", () => {
@@ -1111,9 +1138,36 @@ function initIdentityAccessPage() {
   }
 
   if (form) {
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      setStatus("Ingreso enviado. Verificaremos tus credenciales.");
+      setStatus("");
+      if (!submitButton) return;
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Ingresando...";
+
+      try {
+        const data = await request("POST", "/api/auth/login", {
+          email: emailInput?.value ?? "",
+          password: passwordInput?.value ?? ""
+        });
+
+        if (data?.token) {
+          localStorage.setItem("authToken", data.token);
+        }
+
+        setStatus("Inicio de sesión exitoso.");
+
+        if (data?.role === "patient") {
+          window.location.href = "historial.html";
+          return;
+        }
+      } catch (error) {
+        setStatus(error.message || "No se pudo iniciar sesión.");
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Ingresar";
+      }
     });
   }
 
@@ -1354,11 +1408,7 @@ function initPatientDataPage() {
   };
 
   const sendConfirmationEmail = async (payload) => {
-      await fetch(buildApiUrl("/api/enviar-confirmacion"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+       await request("POST", "/api/enviar-confirmacion", payload);
   };
 
   const handleSubmit = async () => {
@@ -1437,11 +1487,7 @@ function initConfirmationPage() {
   const triggerEmailConfirmation = async () => {
     if (!payload) return;
     try {
-            await fetch(buildApiUrl("/api/enviar-confirmacion"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+     await request("POST", "/api/enviar-confirmacion", payload);
     } catch (error) {
       // Mantén este bloque por si el endpoint mock falla en ambiente local.
     }
@@ -1455,6 +1501,13 @@ function getCurrentPage() {
   return page ?? "";
 }
 
+function enforceAuthGuard() {
+  const protectedPages = ["historial", "agendar", "datos", "horarios", "confirmacion"];
+  const currentPage = getCurrentPage();
+  if (protectedPages.includes(currentPage) && !localStorage.getItem("authToken")) {
+    window.location.href = "ingreseAqui.html";
+  }
+}
 function initNavigationHighlight() {
   const currentPage = getCurrentPage();
   const highlightPage = ["horarios", "datos", "confirmacion"].includes(currentPage)
@@ -1731,6 +1784,7 @@ const pageInitializers = {
 };
 
 window.addEventListener("DOMContentLoaded", () => {
+  enforceAuthGuard();
   initNavigationHighlight();
   initSmoothScroll();
 
