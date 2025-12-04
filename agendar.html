@@ -31,116 +31,128 @@
       </nav>
     </header>
 
-    <main class="booking">
-      <header class="booking__intro">
-        <span class="booking__tag">Agenda en minutos</span>
-        <h1>Elige a tu kinesiólogo y reserva en línea</h1>
-        <p>
-          Selecciona al especialista ideal para tu objetivo y revisa los horarios disponibles para tu próxima sesión.
-          <!-- Puedes ajustar este texto introductorio para comunicar promociones o anuncios específicos. -->
-        </p>
-      </header>
+     <div id="registro-container" style="display:none;">
+      <main class="booking">
+        <header class="booking__intro">
+          <span class="booking__tag">Agenda en minutos</span>
+          <h1>Elige a tu kinesiólogo y reserva en línea</h1>
+          <p>
+            Selecciona al especialista ideal para tu objetivo y revisa los horarios disponibles para tu próxima sesión.
+            <!-- Puedes ajustar este texto introductorio para comunicar promociones o anuncios específicos. -->
+          </p>
+        </header>
 
       <section class="booking__shell">
-        <!-- Ajusta el fondo y los bordes de este contenedor en home.css dentro de .booking__shell. -->
-        <aside class="booking__sidebar">
-          <div class="booking__sidebar-head">
-            <span class="booking__category">Kinesiología</span>
-            <p>Explora nuestro equipo y selecciona a quien acompañará tu proceso.</p>
-          </div>
+          <!-- Ajusta el fondo y los bordes de este contenedor en home.css dentro de .booking__shell. -->
+          <aside class="booking__sidebar">
+            <div class="booking__sidebar-head">
+              <span class="booking__category">Kinesiología</span>
+              <p>Explora nuestro equipo y selecciona a quien acompañará tu proceso.</p>
+            </div>
 
            <ul class="booking__list" role="tablist" data-professional-list>
-            <li class="booking__list-placeholder" data-professional-placeholder>
-              <div class="booking-card booking-card--placeholder" aria-live="polite">
-                <span class="booking-card__loader" aria-hidden="true"></span>
-                <span class="booking-card__info">
-                    <strong>Sincronizando agenda en tiempo real…</strong>
-                  <span>En segundos verás a los especialistas con horarios actualizados</span>
-                </span>
-              </div>
-              <p class="booking__placeholder-help">
-                ¿Prefieres agendar de inmediato? Escríbenos a
-                <a href="https://wa.me/56912345678" target="_blank" rel="noopener">WhatsApp</a>
-                o llama al <a href="tel:+56212345678">+56 2 1234 5678</a> y coordinamos por ti.
-              </p>
-            </li>
-          </ul>
-          <!-- Reemplaza las fotos de los profesionales modificando las clases .booking-card__avatar--nombre en home.css -->
-        </aside>
+              <li class="booking__list-placeholder" data-professional-placeholder>
+                <div class="booking-card booking-card--placeholder" aria-live="polite">
+                  <span class="booking-card__loader" aria-hidden="true"></span>
+                  <span class="booking-card__info">
+                      <strong>Sincronizando agenda en tiempo real…</strong>
+                    <span>En segundos verás a los especialistas con horarios actualizados</span>
+                  </span>
+                </div>
+                <p class="booking__placeholder-help">
+                  ¿Prefieres agendar de inmediato? Escríbenos a
+                  <a href="https://wa.me/56912345678" target="_blank" rel="noopener">WhatsApp</a>
+                  o llama al <a href="tel:+56212345678">+56 2 1234 5678</a> y coordinamos por ti.
+                </p>
+              </li>
+            </ul>
+            <!-- Reemplaza las fotos de los profesionales modificando las clases .booking-card__avatar--nombre en home.css -->
+          </aside>
 
         <article class="booking__profile" aria-live="polite">
-          <div class="booking__profile-header">
-            <div class="booking__profile-photo booking__profile-photo--lissette" aria-hidden="true"></div>
-            <!-- Cambia la imagen principal del perfil editando la clase .booking__profile-photo--lissette en home.css -->
-            <div class="booking__profile-info">
-              <div class="booking__profile-meta">
-                <span class="booking__profile-specialty" data-profile-role>Rehabilitación musculoesquelética</span>
-                <div class="booking__profile-tags" data-profile-tags>
-                  <span>Deportivo</span>
-                  <span>Dolor crónico</span>
-                  <span>Telemedicina</span>
+            <div class="booking__profile-header">
+              <div class="booking__profile-photo booking__profile-photo--lissette" aria-hidden="true"></div>
+              <!-- Cambia la imagen principal del perfil editando la clase .booking__profile-photo--lissette en home.css -->
+              <div class="booking__profile-info">
+                <div class="booking__profile-meta">
+                  <span class="booking__profile-specialty" data-profile-role>Rehabilitación musculoesquelética</span>
+                  <div class="booking__profile-tags" data-profile-tags>
+                    <span>Deportivo</span>
+                    <span>Dolor crónico</span>
+                    <span>Telemedicina</span>
+                  </div>
                 </div>
+                <h2 data-profile-name>Lissette Manríquez</h2>
+                <p data-profile-bio>
+                  Me dedico a la rehabilitación y prevención de lesiones musculoesqueléticas, promoviendo el ejercicio
+                  terapéutico personalizado con seguimiento digital y acompañamiento constante.
+                </p>
               </div>
-              <h2 data-profile-name>Lissette Manríquez</h2>
-              <p data-profile-bio>
-                Me dedico a la rehabilitación y prevención de lesiones musculoesqueléticas, promoviendo el ejercicio
-                terapéutico personalizado con seguimiento digital y acompañamiento constante.
-              </p>
+   <div class="booking__profile-body">
+              <section class="booking__sessions" aria-label="Planes disponibles">
+                <h3>Selecciona un servicio</h3>
+                <div class="booking__session-grid" data-session-grid>
+                  <article class="session-card">
+                    <div class="session-card__info">
+                      <h4>1 sesión de kinesiología</h4>
+                      <span>45 minutos</span>
+                    </div>
+                    <strong class="session-card__price">$25.000</strong>
+                    <button class="session-card__action" type="button">Ver horarios</button>
+                  </article>
+                  <article class="session-card">
+                    <div class="session-card__info">
+                      <h4>Recovery</h4>
+                      <span>Sesión 55 minutos</span>
+                    </div>
+                    <strong class="session-card__price">$35.000</strong>
+                    <button class="session-card__action" type="button">Ver horarios</button>
+                  </article>
+                  <article class="session-card">
+                    <div class="session-card__info">
+                      <h4>Plan semanal 3 sesiones</h4>
+                      <span>Duración 1 hora</span>
+                    </div>
+                    <strong class="session-card__price">$75.000</strong>
+                    <button class="session-card__action" type="button">Ver horarios</button>
+                  </article>
+                  <article class="session-card">
+                    <div class="session-card__info">
+                      <h4>Evaluación kinesiológica</h4>
+                      <span>Consulta inicial</span>
+                    </div>
+                    <strong class="session-card__price">$15.000</strong>
+                    <button class="session-card__action" type="button">Ver horarios</button>
+                  </article>
+                </div>
+                <!-- Personaliza los planes y precios usando app.js o editando directamente este bloque -->
+              </section>
+         <section class="booking__help">
+                <h3>¿Necesitas orientación?</h3>
+                <p>
+                  Si tienes dudas sobre qué profesional elegir, contáctanos y te guiaremos según tu diagnóstico.
+                  <!-- Sustituye este texto con un mensaje comercial o número telefónico de contacto -->
+                </p>
+                <a class="booking__help-link" href="mailto:contacto@kine.cl">Escríbenos a contacto@kine.cl</a>
+              </section>
             </div>
-          </div>
+          </article>
+        </section>
+      </main>
+    </div>
 
+    <div id="agendar-directo" style="display:none;" class="booking-direct">
+      <section class="booking__shell">
+        <div class="booking__profile">
           <div class="booking__profile-body">
-            <section class="booking__sessions" aria-label="Planes disponibles">
-              <h3>Selecciona un servicio</h3>
-              <div class="booking__session-grid" data-session-grid>
-                <article class="session-card">
-                  <div class="session-card__info">
-                    <h4>1 sesión de kinesiología</h4>
-                    <span>45 minutos</span>
-                  </div>
-                  <strong class="session-card__price">$25.000</strong>
-                  <button class="session-card__action" type="button">Ver horarios</button>
-                </article>
-                <article class="session-card">
-                  <div class="session-card__info">
-                    <h4>Recovery</h4>
-                    <span>Sesión 55 minutos</span>
-                  </div>
-                  <strong class="session-card__price">$35.000</strong>
-                  <button class="session-card__action" type="button">Ver horarios</button>
-                </article>
-                <article class="session-card">
-                  <div class="session-card__info">
-                    <h4>Plan semanal 3 sesiones</h4>
-                    <span>Duración 1 hora</span>
-                  </div>
-                  <strong class="session-card__price">$75.000</strong>
-                  <button class="session-card__action" type="button">Ver horarios</button>
-                </article>
-                <article class="session-card">
-                  <div class="session-card__info">
-                    <h4>Evaluación kinesiológica</h4>
-                    <span>Consulta inicial</span>
-                  </div>
-                  <strong class="session-card__price">$15.000</strong>
-                  <button class="session-card__action" type="button">Ver horarios</button>
-                </article>
-              </div>
-              <!-- Personaliza los planes y precios usando app.js o editando directamente este bloque -->
-            </section>
-
-            <section class="booking__help">
-              <h3>¿Necesitas orientación?</h3>
-              <p>
-                Si tienes dudas sobre qué profesional elegir, contáctanos y te guiaremos según tu diagnóstico.
-                <!-- Sustituye este texto con un mensaje comercial o número telefónico de contacto -->
-              </p>
-              <a class="booking__help-link" href="mailto:contacto@kine.cl">Escríbenos a contacto@kine.cl</a>
-            </section>
+            <h3>Bienvenido, <span id="nombrePaciente"></span></h3>
+            <p>RUT: <span id="rutPaciente"></span></p>
+            <p>Email: <span id="emailPaciente"></span></p>
+            <!-- Aquí va el calendario u opciones de agendar hora -->
           </div>
-        </article>
+        </div>
       </section>
-    </main>
+    </div>
   </div>
 
   <!-- Define la URL base de la API antes del script principal. -->

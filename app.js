@@ -1169,6 +1169,7 @@ function initIdentityAccessPage() {
         submitButton.textContent = "Ingresar";
       }
     });
+      
   }
 
   updateButton();
@@ -1502,7 +1503,7 @@ function getCurrentPage() {
 }
 
 function enforceAuthGuard() {
-  const protectedPages = ["historial", "agendar", "datos", "horarios", "confirmacion"];
+  const protectedPages = ["historial"]; // ÚNICA página protegida
   const currentPage = getCurrentPage();
   if (protectedPages.includes(currentPage) && !localStorage.getItem("authToken")) {
     window.location.href = "ingreseAqui.html";
@@ -1725,8 +1726,39 @@ function updateProfile(key) {
   }
 }
 
-function initBookingPage() {
+  async function initBookingPage() {
   const bookingRoot = document.querySelector(".booking");
+  const registroContainer = document.getElementById("registro-container");
+  const agendarDirecto = document.getElementById("agendar-directo");
+  const nombrePaciente = document.getElementById("nombrePaciente");
+  const rutPaciente = document.getElementById("rutPaciente");
+  const emailPaciente = document.getElementById("emailPaciente");
+
+  const token = localStorage.getItem("authToken");
+
+  if (registroContainer && agendarDirecto) {
+    if (!token) {
+      registroContainer.style.display = "block";
+      agendarDirecto.style.display = "none";
+    } else {
+      registroContainer.style.display = "none";
+      agendarDirecto.style.display = "block";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/me/`, {
+          headers: { Authorization: "Token " + token }
+        });
+        const userData = await response.json();
+
+        if (nombrePaciente) nombrePaciente.textContent = userData.name;
+        if (rutPaciente) rutPaciente.textContent = userData.rut;
+        if (emailPaciente) emailPaciente.textContent = userData.email;
+      } catch (err) {
+        console.error("Error obteniendo datos:", err);
+      }
+    }
+  }
+
   if (!bookingRoot) return;
 
   const list = bookingRoot.querySelector("[data-professional-list]");
@@ -1784,11 +1816,15 @@ const pageInitializers = {
 };
 
 window.addEventListener("DOMContentLoaded", () => {
-  enforceAuthGuard();
+
+    const currentPage = getCurrentPage();
+  if (["historial"].includes(currentPage)) {
+    enforceAuthGuard();
+  }
+  
   initNavigationHighlight();
   initSmoothScroll();
 
-  const currentPage = getCurrentPage();
   const initializer = pageInitializers[currentPage];
   if (typeof initializer === "function") {
     initializer();
